@@ -1,49 +1,64 @@
-# My Skills
+# my-skills
 
-一组可复用的个人 Codex skills。
+Bryant Yang 的 Claude Code skill 合集。
 
-这个仓库只放通用 skill、模板、脚本和匿名示例，不放真实照片、真实姓名、真实日期、私有音频或客户数据。
+## 安装
 
-## Repository Layout
+```bash
+git clone <repo-url> ~/.claude/skills
+```
 
-- `skills/`
-  每个 skill 的完整实现目录，包含 `SKILL.md`、脚本、参考资料和模板资源。
-- `examples/`
-  每个 skill 的匿名输入示例或 brief。
-- `docs/`
-  仓库级说明、边界说明和后续迭代记录。
+Skills 目录放在 `~/.claude/skills/` 下，Claude Code 会自动加载。
 
-## Included Skills
+## Skills
 
 ### `generate-wedding-slideshow`
 
-从一组照片、一个简短标题和一份自然语言歌单描述，生成一套独立的婚礼播放项目。
+给一组照片和一段歌单描述，生成一套完整的婚礼展示项目。
 
-输出内容：
+**输出：**
+- `wedding-starry.html` — 大屏正片（全屏轮播 + 背景音乐）
+- `share/` — 带密码保护的网页分享版（Node.js 服务）
+- `data/project.json` + `data/playlist.json` — 项目配置
 
-- 大屏正片
-- 带密码的分享版
-- 匿名项目配置
-- 可继续补充音乐的目录结构
+**用法：**
 
-这个 skill 的目标不是做一套复杂系统，而是把一类高频、可复用的交付流程压缩成一个足够轻、但可以直接工作的模板与脚本组合。
+直接告诉 Claude：
+```
+Use $generate-wedding-slideshow，照片在 /path/to/photos，输出到 /path/to/output，歌单偏甜暖中文流行
+```
 
-## What This Repo Optimizes For
+或手动运行脚本：
+```bash
+python3 skills/generate-wedding-slideshow/scripts/scaffold_project.py \
+  --title "婚礼纪念" \
+  --photo-dir /path/to/photos \
+  --output-dir /path/to/output \
+  --playlist-brief "偏甜暖，中文流行为主"
+```
 
-- 目录清晰，单个 skill 自包含
-- 模板匿名，可直接复用
-- 输入尽量少，输出尽量完整
-- 先做能落地的最小工具，再考虑扩展
+依赖：Python 3、Node.js
 
-## Quick Start
+---
 
-1. 进入目标 skill 目录，例如 `skills/generate-wedding-slideshow/`
-2. 阅读对应的 `SKILL.md`
-3. 按要求提供输入目录、输出目录和简要说明
-4. 用内置脚本生成独立项目
+### `image`
 
-## Notes
+用自然语言生成图片，内置 1050 条 prompt 参考库辅助构建高质量 prompt。
 
-- 仓库中的 wedding 模板是匿名模板，不绑定任何具体婚礼
-- 音乐文件不进入仓库；如需下载，交由对应 skill 在生成后的项目目录中处理
-- 后续可以继续增加新的风格或新的 skill，但不会把这个仓库做成重型平台
+**用法：**
+
+```
+/image 画一只在雨中撑伞的猫，赛博朋克风格
+```
+
+**配置：**
+
+复制并填写 API key：
+```bash
+cp skills/image/config.env.example skills/image/config.env
+# 编辑 config.env，填入 GPTSAPI_KEY
+```
+
+支持模型：`gpt-image-1.5`（默认）、`gemini-2.5-flash-image-hd`
+
+依赖：Python 3、curl
