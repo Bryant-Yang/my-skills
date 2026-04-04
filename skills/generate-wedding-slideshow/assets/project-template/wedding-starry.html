@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wedding Slideshow</title>
+<link rel="icon" href="data:,">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg-0:#040612;--bg-1:#0f1731;--bg-2:#2b1645;--gold:rgba(245,204,113,.92);--warm:rgba(249,241,224,.94);--warm-soft:rgba(249,241,224,.58);--line:rgba(255,255,255,.09)}
+html,body{width:100%;height:100%;overflow:hidden;background:
+radial-gradient(circle at 18% 16%, rgba(98,149,255,.24), transparent 28%),
+radial-gradient(circle at 82% 16%, rgba(255,126,174,.2), transparent 28%),
+radial-gradient(circle at 50% 82%, rgba(245,204,113,.16), transparent 26%),
+linear-gradient(145deg,var(--bg-0) 0%,var(--bg-1) 42%,var(--bg-2) 100%);
+color:var(--warm);font-family:"Noto Serif SC","Songti SC",serif;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:
+radial-gradient(circle at 22% 24%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+radial-gradient(circle at 76% 20%, rgba(245,204,113,.22) 0 1px, transparent 2px),
+radial-gradient(circle at 68% 78%, rgba(102,151,255,.18) 0 1px, transparent 2px),
+radial-gradient(circle at 28% 72%, rgba(255,135,180,.18) 0 1px, transparent 2px);opacity:.72}
+#sky,#light-beams,#star-trails{position:fixed;inset:0;pointer-events:none}
+#sky{z-index:0}#light-beams{z-index:1;overflow:hidden;mix-blend-mode:screen}#star-trails{z-index:2;overflow:hidden}
+.beam{position:absolute;width:24vw;height:160vh;top:-28vh;border-radius:999px;opacity:.28;filter:blur(26px);transform-origin:center top;animation:beam-sway 14s ease-in-out infinite alternate}
+.beam.b1{left:2vw;background:linear-gradient(to bottom, rgba(111,159,255,.3), rgba(111,159,255,.06) 34%, transparent 78%);transform:rotate(-18deg)}
+.beam.b2{left:38vw;background:linear-gradient(to bottom, rgba(255,137,180,.26), rgba(255,137,180,.06) 34%, transparent 78%);transform:rotate(4deg);animation-delay:-7s}
+.beam.b3{right:4vw;background:linear-gradient(to bottom, rgba(245,204,113,.28), rgba(245,204,113,.06) 34%, transparent 78%);transform:rotate(16deg);animation-delay:-10s}
+@keyframes beam-sway{from{opacity:.1;transform:translateY(-1vh) rotate(var(--r,0deg)) scaleY(.98)}to{opacity:.32;transform:translateY(1.8vh) rotate(calc(var(--r,0deg) + 5deg)) scaleY(1.08)}}
+.trail{position:absolute;width:clamp(180px,18vw,320px);height:2px;border-radius:999px;opacity:0;background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,247,228,.94) 18%, rgba(255,221,164,.74) 45%, rgba(149,187,255,.18) 82%, rgba(149,187,255,0));box-shadow:0 0 12px rgba(255,232,191,.42);transform-origin:left center;animation:trail-drift var(--d,16s) linear infinite, trail-bloom var(--d,16s) ease-in-out infinite}
+.trail.t1{top:16%;left:-12%;--r:10deg;--d:18s;animation-delay:-3s}.trail.t2{top:28%;left:68%;--r:-12deg;--d:20s;animation-delay:-11s}.trail.t3{top:54%;left:-10%;--r:8deg;--d:22s;animation-delay:-7s}.trail.t4{top:66%;left:74%;--r:-14deg;--d:19s;animation-delay:-15s}.trail.t5{top:38%;left:18%;--r:-7deg;--d:24s;animation-delay:-5s}
+@keyframes trail-drift{0%{transform:translate3d(-8vw,2vh,0) rotate(var(--r,0deg))}100%{transform:translate3d(12vw,-3vh,0) rotate(var(--r,0deg))}}
+@keyframes trail-bloom{0%,14%,100%{opacity:0}22%,64%{opacity:.84}78%{opacity:.2}}
+.app{position:fixed;inset:0;z-index:3}
+.bg-blur{position:absolute;inset:-8%;background-size:cover;background-position:center;filter:blur(42px) brightness(.34) saturate(1.02);transform:scale(1.12);opacity:.5;transition:background-image .35s ease}
+.bg-vignette{position:absolute;inset:0;background:
+linear-gradient(180deg, rgba(2,4,12,.28), rgba(2,4,12,.04) 28%, rgba(2,4,12,.56) 100%),
+radial-gradient(circle at center, transparent 18%, rgba(0,0,0,.36) 100%)}
+.top{position:absolute;top:20px;left:20px;right:20px;z-index:6;display:flex;align-items:center;justify-content:space-between}
+.chip{padding:10px 14px;border-radius:999px;background:rgba(8,10,20,.24);border:1px solid var(--line);backdrop-filter:blur(12px);font-size:11px;letter-spacing:.16em;color:rgba(249,241,224,.74)}
+.chip.music{color:var(--gold)}
+.screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:80px 28px 96px}
+.photo-shell{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.photo-frame{position:relative;overflow:visible}
+.photo{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 36px 82px rgba(0,0,0,.42))}
+.hero-orbits{position:absolute;inset:50% auto auto 50%;width:min(78vw,860px);height:min(78vw,860px);transform:translate(-50%,-50%);pointer-events:none}
+.orbit{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 0 24px rgba(255,255,255,.03),0 0 32px rgba(245,204,113,.03);animation:orbit-spin 18s linear infinite}
+.orbit.o2{inset:9%;border-color:rgba(245,204,113,.16);animation-duration:13s;animation-direction:reverse}
+.orbit.o3{inset:22%;border-color:rgba(255,130,177,.14);animation-duration:10s}
+@keyframes orbit-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.caption{position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);padding:10px 16px;border-radius:999px;background:rgba(8,10,20,.24);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(12px);font-size:12px;letter-spacing:.14em;color:rgba(249,241,224,.76);white-space:nowrap}
+.page-title{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5}
+.title-card{text-align:center;padding:42px 52px;border-radius:32px;background:rgba(9,11,22,.26);border:1px solid rgba(245,204,113,.14);backdrop-filter:blur(20px);box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.title-kicker{font-size:12px;letter-spacing:.42em;color:rgba(249,241,224,.3)}
+.title-main{margin-top:18px;font-size:clamp(48px,7vw,84px);font-weight:300;letter-spacing:.18em}
+.title-sub{margin-top:14px;font-size:16px;letter-spacing:.3em;color:var(--warm-soft)}
+.title-card.hidden,.photo-shell.hidden{display:none}
+.hint{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);z-index:7;padding:10px 16px;border-radius:999px;background:rgba(8,10,20,.22);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(12px);font-size:12px;letter-spacing:.12em;color:rgba(249,241,224,.74);transition:opacity .45s ease}
+.bar{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);z-index:7;width:min(80vw,620px);padding:8px;border-radius:999px;background:rgba(8,10,20,.22);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(12px)}
+.bar-fill{height:4px;border-radius:999px;background:linear-gradient(90deg, rgba(98,149,255,.95), rgba(255,130,177,.92), rgba(245,204,113,.95));width:0%}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;background:rgba(3,4,10,.68);backdrop-filter:blur(12px)}
+.overlay.hidden{display:none}
+.overlay-card{text-align:center;padding:32px 36px;border-radius:28px;background:rgba(9,11,22,.54);border:1px solid rgba(245,204,113,.16)}
+.overlay-main{font-size:18px;letter-spacing:.18em}.overlay-sub{margin-top:12px;font-size:13px;letter-spacing:.12em;color:var(--warm-soft)}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<div id="light-beams"><span class="beam b1" style="--r:-18deg"></span><span class="beam b2" style="--r:8deg"></span><span class="beam b3" style="--r:16deg"></span></div>
+<div id="star-trails"><span class="trail t1"></span><span class="trail t2"></span><span class="trail t3"></span><span class="trail t4"></span><span class="trail t5"></span></div>
+<main class="app">
+  <div class="bg-blur" id="bgBlur"></div>
+  <div class="bg-vignette"></div>
+  <audio id="bgm" preload="none"></audio>
+  <div class="top"><div class="chip" id="countChip">准备中</div><div class="chip music" id="musicChip">音乐待命</div></div>
+  <div class="screen">
+    <div class="page-title" id="titlePage"><div class="title-card" id="titleCard"><div class="title-kicker" id="titleKicker">WEDDING SCREEN</div><div class="title-main" id="titleMain">婚礼纪念</div><div class="title-sub" id="titleSub">Love, Joy, Celebration</div></div></div>
+    <div class="photo-shell hidden" id="photoShell"><div class="hero-orbits"><div class="orbit o1"></div><div class="orbit o2"></div><div class="orbit o3"></div></div><div class="photo-frame" id="photoFrame"><canvas class="photo" id="photoCanvas" aria-label="婚礼照片"></canvas><div class="caption" id="caption"></div></div></div>
+  </div>
+  <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+  <div class="hint" id="hint">点击开始音乐 · 空格/→ 下一张 · ← 上一张 · F 全屏</div>
+  <div class="overlay" id="overlay"><div class="overlay-card"><div class="overlay-main">点击任意处开始音乐</div><div class="overlay-sub">画面会自动播放，音乐将在首次点击后开始</div></div></div>
+</main>
+<script>
+const bgBlur=document.getElementById('bgBlur');const bgm=document.getElementById('bgm');const countChip=document.getElementById('countChip');const musicChip=document.getElementById('musicChip');const hint=document.getElementById('hint');const overlay=document.getElementById('overlay');const titlePage=document.getElementById('titlePage');const titleMain=document.getElementById('titleMain');const titleSub=document.getElementById('titleSub');const photoShell=document.getElementById('photoShell');const photoFrame=document.getElementById('photoFrame');const photoCanvas=document.getElementById('photoCanvas');const caption=document.getElementById('caption');const barFill=document.getElementById('barFill');
+let project=null;let playlist=[];let slides=[];let slideIndex=0;let timer=null;let trackIndex=0;let audioStarted=false;let photoBitmap=null;let photoMotion=null;let photoRaf=0;let progressRaf=0;const PHOTO_MOTIONS=['zi','zo','left','right'];
+async function loadJson(path){const res=await fetch(path);if(!res.ok)throw new Error(path);return res.json()}
+function buildSlides(){slides=[{kind:'opening',ms:project.timing?.openingMs||3600,title:project.opening?.title||project.title,subtitle:project.opening?.subtitle||project.subtitle}];(project.photos||[]).forEach((src,idx)=>{slides.push({kind:'photo',ms:project.timing?.photoMs||4800,src,caption:(project.captionPool||[])[idx%(project.captionPool||['']).length]||''})});slides.push({kind:'closing',ms:project.timing?.closingMs||3600,title:project.closing?.title||'谢谢见证',subtitle:project.closing?.subtitle||''})}
+function updateMusicChip(){musicChip.textContent=audioStarted&&!bgm.paused?'音乐播放中':'音乐待命'}
+async function startMusic(){if(audioStarted||!playlist.length)return;audioStarted=true;bgm.volume=.72;bgm.src=playlist[trackIndex];await bgm.play().catch(()=>{audioStarted=false});updateMusicChip();overlay.classList.add('hidden')}
+bgm.addEventListener('ended',()=>{if(!playlist.length)return;trackIndex=(trackIndex+1)%playlist.length;bgm.src=playlist[trackIndex];bgm.play().catch(()=>{});updateMusicChip()});bgm.addEventListener('play',updateMusicChip);bgm.addEventListener('pause',updateMusicChip);
+function layoutFrame(bitmap){const shellRect=photoShell.getBoundingClientRect();const maxWidth=Math.min(shellRect.width,1320);const maxHeight=Math.min(shellRect.height,window.innerHeight*.8);const aspect=bitmap.width/bitmap.height;let width=maxWidth;let height=width/aspect;if(height>maxHeight){height=maxHeight;width=height*aspect}photoFrame.style.width=`${Math.max(220,Math.floor(width))}px`;photoFrame.style.height=`${Math.max(220,Math.floor(height))}px`}
+async function drawPhoto(src){const bitmap=await createImageBitmap(await (await fetch(src)).blob());if(photoBitmap)photoBitmap.close();photoBitmap=bitmap;photoMotion={name:PHOTO_MOTIONS[slideIndex%PHOTO_MOTIONS.length],startedAt:performance.now(),duration:(slides[slideIndex]?.ms||4800)+240};if(!photoRaf)photoRaf=requestAnimationFrame(drawPhotoFrame)}
+function drawPhotoFrame(){photoRaf=0;if(!photoBitmap||!photoMotion)return;layoutFrame(photoBitmap);const rect=photoFrame.getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,2);photoCanvas.width=Math.floor(rect.width*dpr);photoCanvas.height=Math.floor(rect.height*dpr);photoCanvas.style.width=`${rect.width}px`;photoCanvas.style.height=`${rect.height}px`;const ctx=photoCanvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,rect.width,rect.height);const p=Math.min(1,(performance.now()-photoMotion.startedAt)/photoMotion.duration);const baseScale=Math.min(rect.width/photoBitmap.width,rect.height/photoBitmap.height);const safeZoom=.96+p*.08;let panX=0;let panY=0;if(photoMotion.name==='zi')panY=(.01-p*.02)*rect.height;else if(photoMotion.name==='zo')panY=(-.01+p*.02)*rect.height;else if(photoMotion.name==='left')panX=(-.02+p*.04)*rect.width;else if(photoMotion.name==='right')panX=(.02-p*.04)*rect.width;const drawWidth=photoBitmap.width*baseScale*safeZoom;const drawHeight=photoBitmap.height*baseScale*safeZoom;const dx=(rect.width-drawWidth)/2+panX;const dy=(rect.height-drawHeight)/2+panY;ctx.drawImage(photoBitmap,dx,dy,drawWidth,drawHeight);if(p<1)photoRaf=requestAnimationFrame(drawPhotoFrame)}
+function startProgress(ms){cancelAnimationFrame(progressRaf);const startedAt=performance.now();const tick=now=>{const progress=Math.min(1,(now-startedAt)/ms);barFill.style.width=`${(progress*100).toFixed(2)}%`;if(progress<1)progressRaf=requestAnimationFrame(tick)};progressRaf=requestAnimationFrame(tick)}
+function renderSlide(){const slide=slides[slideIndex];if(!slide)return;countChip.textContent=`${slideIndex+1} / ${slides.length}`;titlePage.classList.toggle('hidden',slide.kind==='photo');photoShell.classList.toggle('hidden',slide.kind!=='photo');if(slide.kind==='photo'){bgBlur.style.backgroundImage=`url("${slide.src}")`;caption.textContent=slide.caption||'';drawPhoto(slide.src).catch(()=>{})}else{titleMain.textContent=slide.title||project.title;titleSub.textContent=slide.subtitle||'';bgBlur.style.backgroundImage='none'}clearTimeout(timer);startProgress(slide.ms);timer=setTimeout(()=>goTo(slideIndex+1),slide.ms)}
+function goTo(nextIndex){slideIndex=nextIndex>=slides.length?0:nextIndex<0?slides.length-1:nextIndex;renderSlide()}
+function next(){goTo(slideIndex+1)}function prev(){goTo(slideIndex-1)}
+document.addEventListener('click',()=>{startMusic().catch(()=>{})},{once:true});document.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key===' '){event.preventDefault();startMusic().catch(()=>{});next()}else if(event.key==='ArrowLeft'){event.preventDefault();prev()}else if(event.key.toLowerCase()==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});document.addEventListener('keydown',()=>{hint.style.opacity='0'},{once:true});
+window.addEventListener('resize',()=>{if(photoMotion)photoMotion.startedAt=performance.now();if(photoBitmap&&!photoRaf)photoRaf=requestAnimationFrame(drawPhotoFrame)});
+async function bootstrap(){project=await loadJson('data/project.json');const playlistData=await loadJson('data/playlist.json');playlist=playlistData.tracks||[];titleMain.textContent=project.opening?.title||project.title||'婚礼纪念';titleSub.textContent=project.opening?.subtitle||project.subtitle||'';buildSlides();renderSlide();setTimeout(()=>{hint.style.opacity='.24'},4200)}bootstrap().catch(error=>{titleMain.textContent='加载失败';titleSub.textContent=String(error.message||error);overlay.classList.add('hidden')});
+const canvas=document.getElementById('sky');const ctx=canvas.getContext('2d');let stars=[];let comets=[];let dpr=1;let skyCenterX=0;let skyCenterY=0;let skyRadius=0;
+function createStars(){stars=Array.from({length:240},()=>{const bloom=Math.random()<.18;const shimmer=Math.random()<.34;const tones=['gold','gold','pink','blue'];const radiusFactor=Math.pow(Math.random(),bloom?.76:.9);const orbitRadius=skyRadius*(.18+radiusFactor*.96);const orbitAngle=Math.random()*Math.PI*2;const orbitFlatten=.72+Math.random()*.2;const armDrift=(Math.random()-.5)*orbitRadius*.08;return{r:bloom?Math.random()*2.2+1.1:Math.random()*1.7+.28,glow:bloom?Math.random()*20+18:Math.random()*12+8,aura:bloom?Math.random()*.22+.2:Math.random()*.14+.08,orbitRadiusX:orbitRadius,orbitRadiusY:orbitRadius*orbitFlatten,orbitAngle,orbitSpeed:(.0000048+(1-radiusFactor)*.00001)*(bloom?.9:1),armDrift,twinkle:Math.random()*Math.PI*2,pulse:Math.random()*.0022+.0012,shimmer,tone:tones[Math.floor(Math.random()*tones.length)]}});comets=Array.from({length:4},()=>makeComet())}
+function makeComet(){return{x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight*.5,vx:Math.random()*7+8,vy:Math.random()*2.2+1.1,life:Math.random()*220+120}}
+function resetComet(comet){comet.x=Math.random()*window.innerWidth*.35;comet.y=Math.random()*window.innerHeight*.4;comet.vx=Math.random()*7+8;comet.vy=Math.random()*2.2+1.1;comet.life=Math.random()*220+120}
+function starColor(tone,alpha){if(tone==='pink')return`rgba(255,132,179,${alpha})`;if(tone==='blue')return`rgba(119,171,255,${alpha})`;return`rgba(248,212,120,${alpha})`}
+function starCore(tone,alpha){if(tone==='pink')return`rgba(255,227,239,${alpha})`;if(tone==='blue')return`rgba(227,238,255,${alpha})`;return`rgba(255,246,228,${alpha})`}
+function starPosition(star,ts){const angle=star.orbitAngle+ts*star.orbitSpeed;const cos=Math.cos(angle);const sin=Math.sin(angle);const tangentX=-sin;const tangentY=cos;const drift=Math.sin(ts*.00045+star.twinkle)*star.armDrift;return{x:skyCenterX+cos*star.orbitRadiusX+tangentX*drift,y:skyCenterY+sin*star.orbitRadiusY+tangentY*drift*.42}}
+function resizeSky(){dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.floor(window.innerWidth*dpr);canvas.height=Math.floor(window.innerHeight*dpr);canvas.style.width=`${window.innerWidth}px`;canvas.style.height=`${window.innerHeight}px`;ctx.setTransform(dpr,0,0,dpr,0,0);skyCenterX=window.innerWidth*.5;skyCenterY=window.innerHeight*1.08;skyRadius=Math.hypot(window.innerWidth*.78,window.innerHeight*1.02);createStars()}
+function drawSky(ts){ctx.clearRect(0,0,window.innerWidth,window.innerHeight);for(const star of stars){const pulse=(Math.sin(ts*star.pulse+star.twinkle)+1)*.5;const alpha=star.aura+pulse*(star.shimmer?.52:.34);const color=starColor(star.tone,alpha);const core=starCore(star.tone,Math.min(.96,alpha+.26));const pos=starPosition(star,ts);const x=pos.x;const y=pos.y;if(star.r>1.15){ctx.beginPath();ctx.fillStyle=starColor(star.tone,star.aura*.42+pulse*.12);ctx.shadowColor=color;ctx.shadowBlur=star.glow*1.6;ctx.arc(x,y,star.r*2.2,0,Math.PI*2);ctx.fill()}ctx.beginPath();ctx.fillStyle=core;ctx.shadowColor=color;ctx.shadowBlur=star.glow;ctx.arc(x,y,star.r,0,Math.PI*2);ctx.fill()}for(const comet of comets){comet.x+=comet.vx;comet.y+=comet.vy;comet.life-=1;if(comet.life<=0||comet.x>window.innerWidth+120||comet.y>window.innerHeight+60)resetComet(comet);const grad=ctx.createLinearGradient(comet.x,comet.y,comet.x-comet.vx*8,comet.y-comet.vy*8);grad.addColorStop(0,'rgba(255,255,255,.95)');grad.addColorStop(.22,'rgba(248,205,110,.75)');grad.addColorStop(1,'rgba(248,205,110,0)');ctx.strokeStyle=grad;ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(comet.x,comet.y);ctx.lineTo(comet.x-comet.vx*8,comet.y-comet.vy*8);ctx.stroke()}ctx.shadowBlur=0;requestAnimationFrame(drawSky)}
+resizeSky();requestAnimationFrame(drawSky);window.addEventListener('resize',resizeSky);
+</script>
+</body>
+</html>

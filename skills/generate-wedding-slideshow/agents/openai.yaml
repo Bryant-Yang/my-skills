@@ -1,0 +1,7 @@
+interface:
+  display_name: "Wedding Slideshow"
+  short_description: "根据照片目录与歌单描述生成婚礼大屏与分享版项目"
+  default_prompt: "Use $generate-wedding-slideshow to create a reusable wedding slideshow project from a photo folder and playlist brief."
+
+policy:
+  allow_implicit_invocation: true

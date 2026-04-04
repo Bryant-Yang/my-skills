@@ -1,0 +1,23 @@
+{
+  "title": "婚礼纪念",
+  "subtitle": "Love, Joy, Celebration",
+  "theme": "starry",
+  "opening": {
+    "title": "婚礼纪念",
+    "subtitle": "Love, Joy, Celebration"
+  },
+  "closing": {
+    "title": "谢谢见证",
+    "subtitle": "愿爱与喜悦长久停留"
+  },
+  "timing": {
+    "openingMs": 3600,
+    "photoMs": 4800,
+    "closingMs": 3600
+  },
+  "captionPool": [
+    "目光所及 皆是温柔",
+    "把喜欢写进每一帧光影"
+  ],
+  "photos": []
+}
