@@ -9,6 +9,19 @@ description: Use when the user wants to generate an image, draw something, creat
 
 ## 执行流程（必须严格按顺序）
 
+### 第零步：确保素材库存在
+
+检查 `~/.claude/skills/image/prompts.json` 是否存在：
+
+```bash
+ls ~/.claude/skills/image/prompts.json 2>/dev/null || \
+  curl -fsSL "https://raw.githubusercontent.com/songguoxs/gpt4o-image-prompts/master/data/prompts.json" \
+    -o ~/.claude/skills/image/prompts.json && \
+  echo "prompts.json ready"
+```
+
+如果下载失败，告知用户手动执行该命令，然后终止。
+
 ### 第一步：从素材库搜索参考 prompt
 ```bash
 python3 ~/.claude/skills/image/search_prompts.py "用户描述的关键词" 3
