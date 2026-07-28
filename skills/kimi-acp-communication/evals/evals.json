@@ -1,0 +1,29 @@
+{
+  "skill_name": "kimi-acp-communication",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "把这份 review 通过协议发给我当前的 Kimi session，让它修改完后把结果告诉我。原生 Kimi TUI 还开着。",
+      "expected_output": "识别为 Kimi ACP 通信任务；先检查 session 所有权，明确原生 TUI 不会实时刷新且存在并发 writer 风险，不会未经确认直接并发写入；获得授权后默认按修改任务使用显式 auto，并独立验证修改。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "列一下这个工作目录最近的 Kimi 会话，我想恢复上次那个，但先不要发任何消息。",
+      "expected_output": "使用只读 session/list，不发送 session/prompt，不修改持久化会话文件；列出可辨识的 session ID、工作目录和可用的恢复命令。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "用 ACP 新开一个 Kimi 会话，让它只 review 当前代码，不准改文件，并把流式回复给我。",
+      "expected_output": "创建新 ACP session，权限保持 deny，流式显示新消息，忽略 load/history 回放，结束后报告 session ID 和 stopReason，并确认 ACP 子进程已回收。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Kimi 已经输出了两个 Edit 工具调用，之后半分钟没文字，命令窗口也没继续输出。你直接再开一个 ACP 进程催它完成吧。",
+      "expected_output": "不把工具调用或静默当成完成，也不立即创建第二个 writer；先检查原 helper PID。若仍存活则继续等待同一进程；若已退出但没有 stopReason，则只读检查 agents/main/wire.jsonl 和当前文件状态，判断是否中断，再从已落盘状态续发同一 session。",
+      "files": []
+    }
+  ]
+}

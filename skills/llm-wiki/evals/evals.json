@@ -1,0 +1,42 @@
+{
+  "skill_name": "llm-wiki",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "在一个全新的临时目录里初始化中文个人研究知识库，主题是“Agent 工程”。不要安装数据库或 Obsidian 插件；初始化后验证结构，并说明已有 AGENTS.md 时会怎么处理。",
+      "expected_output": "创建三层 Markdown wiki，生成 WIKI.md、薄 AGENTS.md、raw/wiki 结构、index/log/meta 文件；初始化幂等且不会覆盖已有 AGENTS.md；lint 通过。",
+      "files": [],
+      "expectations": [
+        "The output contains WIKI.md, raw/, wiki/index.md, wiki/log.md, and wiki/meta/schema-proposals.md.",
+        "The transcript uses the bundled init and lint commands.",
+        "The implementation preserves an existing AGENTS.md instead of overwriting it.",
+        "No database, vector store, plugin, or global last-wiki pointer is installed."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "把两份互相矛盾的材料加入同一个测试 wiki：source-a.md 说 Atlas 评测有 72% 通过率，source-b.md 说同一版本在更严格口径下只有 61%。保留原文，建立证据链，更新相关概念页；然后故意改动一份 raw 文件并执行健康检查。",
+      "expected_output": "每份来源只创建一次 raw 快照和哈希；同一概念页保留 72% 与 61% 两个带来源的口径并标 contested；index/log 更新；raw 被改后 lint 报 hash mismatch 且不自动改事实。",
+      "files": [],
+      "expectations": [
+        "Both conflicting claims remain visible with separate provenance and the page is marked contested.",
+        "Each source page records a source_sha256 and a raw-relative source_refs path.",
+        "Reindex and lint run after compilation, followed by one stable operation-id success or failure log result.",
+        "After raw mutation, lint exits non-zero and reports RAW_HASH_MISMATCH without rewriting the claim."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "先在独立临时目录自行建立一个完整测试夹具，包含 Atlas 72% 与 61% 两种口径及其来源。记录整个夹具内所有文件的递归 SHA-256 清单，回答“Atlas 的通过率是多少”且不要写入任何文件，再次记录并证明清单完全相同。然后才故意移除一个索引项、加入一个 [[missing-page]] 坏链接并运行 lint；提出这个错误如果重复出现应如何让 schema 进化。",
+      "expected_output": "独立夹具可复现；查询同时呈现 72%/61% 及口径差异、引用 wiki/raw 证据，查询前后递归哈希清单完全相同；故障注入后 lint 抓到 INDEX_MISSING 与 BROKEN_WIKILINK；schema 演进走提案、证据、审批、迁移、负向探针和回滚，不直接自改。",
+      "files": [],
+      "expectations": [
+        "The evaluation builds its own complete fixture and proves query read-only behavior by identical recursive file-hash manifests before and after the query.",
+        "The query reports both rates with their differing evaluation conditions.",
+        "Lint reports both INDEX_MISSING and BROKEN_WIKILINK.",
+        "The evolution proposal includes evidence, impact, migration, validation, rollback, and a decision owner.",
+        "The skill does not claim that background or autonomous evolution is active."
+      ]
+    }
+  ]
+}
