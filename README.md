@@ -1,6 +1,6 @@
 # my-skills
 
-Bryant Yang 的 Claude Code skill 合集。
+Bryant Yang 的可复用 AI coding agent Skill 合集。
 
 ## 安装
 
@@ -8,7 +8,8 @@ Bryant Yang 的 Claude Code skill 合集。
 git clone <repo-url> ~/.claude/skills
 ```
 
-Skills 目录放在 `~/.claude/skills/` 下，Claude Code 会自动加载。
+仓库中的每个 Skill 位于 `skills/<name>/`。按所用 agent 的 Skill 目录约定，
+复制或链接需要的子目录；不要把整个仓库根目录直接当成单个 Skill。
 
 ## Skills
 
@@ -62,3 +63,44 @@ cp skills/image/config.env.example skills/image/config.env
 支持模型：`gpt-image-1.5`（默认）、`gemini-2.5-flash-image-hd`
 
 依赖：Python 3、curl
+
+---
+
+### `kimi-acp-communication`
+
+通过 Kimi Code 的 ACP 协议安全地列出、恢复和调用 Kimi session。支持流式回复、
+权限默认拒绝、显式修改授权和 ACP 子进程回收，并明确区分“agent 收到消息”和
+“已经打开的原生 Kimi TUI 实时刷新”。
+
+入口：`skills/kimi-acp-communication/SKILL.md`
+
+依赖：Python 3.11+、支持 `kimi acp` 的 Kimi Code CLI
+
+---
+
+### `llm-wiki`
+
+为代码库建立和持续维护面向 agent 的结构化 Wiki，包含初始化、索引、演进日志、
+校验和查询工作流。
+
+入口：`skills/llm-wiki/SKILL.md`
+
+依赖：Python 3.11+
+
+## 从本机 Skill 源同步
+
+仓库只同步白名单中的真实 Skill，不同步嵌套 Git 元数据、缓存或评测工作区：
+
+```bash
+scripts/sync-local-skills.sh /path/to/local/myskills
+scripts/audit-public.sh
+```
+
+当前白名单：
+
+- `kimi-acp-communication`
+- `llm-wiki`
+
+`llm-wiki-workspace`、`.git`、`__pycache__`、`.ruff_cache`、日志和字节码不会进入
+仓库。`audit-public.sh` 会在发布前检查常见凭据、私钥、机器私有路径、具体
+session ID、符号链接和运行产物。

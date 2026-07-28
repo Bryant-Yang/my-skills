@@ -1,0 +1,66 @@
+---
+schema_version: 1
+title: __TITLE__
+language: __LANGUAGE__
+managed_directory_types:
+  - sources=source
+  - entities=entity
+  - concepts=concept
+  - syntheses=synthesis
+  - queries=query
+status_values:
+  - active
+  - contested
+  - superseded
+  - needs-review
+  - no-material
+---
+
+# __TITLE__
+
+## Domain
+
+__DOMAIN__
+
+## Responsibilities
+
+- The human curates sources, sets priorities, and decides unresolved semantic
+  conflicts.
+- The agent maintains compiled pages, provenance, links, the index, and the log.
+- Existing files under `raw/` are immutable. New ingest may create a new
+  snapshot but may not overwrite one.
+
+## Page contract
+
+- Page IDs are globally unique lowercase kebab-case and equal filename stems.
+- Managed pages use the frontmatter contract defined by the `llm-wiki` skill.
+- Use `[[page-id]]` links between managed pages.
+- Put raw-source Markdown links close to material claims.
+- Mark inference, uncertainty, supersession, and disputes explicitly.
+
+## Page types
+
+- `source`: compiled map of one raw source
+- `entity`: person, organization, product, place, or other named subject
+- `concept`: idea, method, framework, or recurring topic
+- `synthesis`: cross-source comparison, thesis, timeline, or decision
+- `query`: a substantial answer explicitly saved by the user
+
+## Status values
+
+- `active`
+- `contested`
+- `superseded`
+- `needs-review`
+- `no-material`
+
+## Initial questions
+
+- What knowledge should this wiki make easier to retrieve or synthesize?
+- Which claims are decision-relevant enough to demand strong provenance?
+- What evidence would change the current synthesis?
+
+## Evolution
+
+Schema changes follow `wiki/meta/schema-proposals.md`. A repeated failure needs
+evidence, a proposed contract change, migration, validation, and rollback.
