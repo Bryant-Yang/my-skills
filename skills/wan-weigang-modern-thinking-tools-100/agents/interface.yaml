@@ -1,0 +1,24 @@
+interface:
+  display_name: "万维钢·现代思维工具100讲"
+  short_description: "为复杂问题选择并运行最少必要的思维工具"
+  default_prompt: "Use $wan-weigang-modern-thinking-tools-100 to model this non-trivial problem, select one primary thinking tool and at most three supporting or falsifying tools, then give a conclusion, action, and update conditions."
+
+compatibility:
+  canonical_format: "agent-skills"
+  adapter_targets:
+    - "openai"
+    - "claude"
+    - "generic"
+  activation:
+    mode: "implicit"
+  execution:
+    context: "inline"
+    shell: "bash"
+  trust:
+    source_tier: "local"
+    remote_inline_execution: "forbid"
+    remote_metadata_policy: "allow-metadata-only"
+  degradation:
+    openai: "neutral-source-plus-adapter"
+    claude: "neutral-source"
+    generic: "neutral-source"

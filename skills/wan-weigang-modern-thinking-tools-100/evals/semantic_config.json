@@ -1,0 +1,49 @@
+{
+  "optimizer_hints": {
+    "capability": "Select and apply modern thinking tools to non-trivial analysis and decisions",
+    "inputs": ["复杂局面", "重要选择", "风险预测", "学习设计", "职业商业", "组织制度", "复杂系统", "价值反思"],
+    "trigger_actions": ["分析", "判断", "预测", "设计", "压力测试", "选择工具", "运行工具"],
+    "exclusions": ["简单事实", "翻译", "摘要", "格式转换", "机械执行", "只倾听不分析"]
+  },
+  "fallback_positive_concepts": ["owned_request"],
+  "positive_concepts": {
+    "owned_request": {
+      "weight": 0.72,
+      "phrases": ["万维钢", "现代思维工具100讲", "贝叶斯先验", "参考类预测", "超级预测", "非遍历性", "凯利公式", "古德哈特", "系统判断", "怎么选", "杠杆点", "绩效指标", "学习计划", "组织改革", "价值前提", "评估风险", "重新估算", "创业机会", "制度设计", "复杂系统", "人生方向", "压力测试"]
+    },
+    "explicit_catalog": {
+      "weight": 0.58,
+      "phrases": ["万维钢", "现代思维工具100讲", "现代思维工具", "贝叶斯先验", "参考类预测", "超级预测", "非遍历性", "凯利公式", "古德哈特", "ooda", "woop", "沃德利地图", "探索和生发"]
+    },
+    "owned_job": {
+      "weight": 0.38,
+      "phrases": ["系统判断", "系统分析", "怎么选", "评估风险", "重新估算", "学习计划", "职业方向", "创业机会", "绩效指标", "组织改革", "制度设计", "复杂系统", "价值前提", "人生方向", "杠杆点", "压力测试"]
+    },
+    "decision_structure": {
+      "weight": 0.18,
+      "phrases": ["主工具", "反证", "硬约束", "退出条件", "可撤回", "反馈", "更新条件", "出局", "概率", "权衡", "下一步"]
+    }
+  },
+  "negative_concepts": {
+    "translation_or_summary": {
+      "weight": 0.7,
+      "exclusive": true,
+      "phrases": ["翻译成", "保持原有", "五条摘要", "压缩成", "不要增加分析", "只要摘要"]
+    },
+    "simple_or_mechanical": {
+      "weight": 0.62,
+      "exclusive": true,
+      "phrases": ["天气怎么样", "排序后另存", "美化缩进", "执行已经确定", "不需要重新判断", "等于多少", "机械计算"]
+    },
+    "support_only": {
+      "weight": 0.62,
+      "exclusive": true,
+      "phrases": ["只想让你听我说", "不要分析", "不需要判断"]
+    },
+    "unsafe_or_other_workflow": {
+      "weight": 0.46,
+      "exclusive": true,
+      "phrases": ["诊断我的", "吃什么药", "不知不觉接受", "保证不会亏", "每次只问我一个问题", "先不要给结论"]
+    }
+  }
+}

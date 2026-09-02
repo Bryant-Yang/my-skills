@@ -1,0 +1,30 @@
+{
+  "name": "wan-weigang-modern-thinking-tools-100",
+  "version": "0.1.0",
+  "owner": "Bryant Yang",
+  "updated_at": "2026-09-02",
+  "status": "experimental",
+  "maturity_tier": "library",
+  "lifecycle_stage": "library",
+  "context_budget_tier": "library",
+  "review_cadence": "semiannual",
+  "skill_ir_source": "reports/skill-ir.json",
+  "skill_archetype": "library",
+  "target_platforms": [
+    "openai",
+    "claude",
+    "generic",
+    "agent-skills-compatible"
+  ],
+  "factory_components": [
+    "agents",
+    "references",
+    "scripts",
+    "evals",
+    "reports"
+  ],
+  "output_contract": "结论、问题模型、一个主工具、至多三个补充或反证工具、分析、行动和更新条件",
+  "rollback_boundary": "将该 Skill 目录恢复到上一个已验证的 Git 版本",
+  "source_attribution": "基于用户提供的《万维钢·现代思维工具100讲》材料整理",
+  "source_license": "NOASSERTION"
+}

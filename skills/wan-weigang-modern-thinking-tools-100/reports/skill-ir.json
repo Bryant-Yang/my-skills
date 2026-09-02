@@ -1,0 +1,113 @@
+{
+  "schema_version": "2.0.0",
+  "name": "wan-weigang-modern-thinking-tools-100",
+  "title": "万维钢·现代思维工具100讲",
+  "job_to_be_done": "Use when a user wants structured help with a non-trivial situation analysis, consequential decision, risk forecast, learning design, career or business strategy, cooperation or organization issue, complex-system intervention, or values reflection by selecting and applying the smallest useful subset of 万维钢《现代思维工具100讲》. Also trigger when the user names 万维钢、现代思维工具100讲, or a catalog tool. Do not trigger for simple facts, translation, summarization, formatting, mechanical execution, therapy, or emotional support without requested analysis.",
+  "trigger_surface": {
+    "description": "Use when a user wants structured help with a non-trivial situation analysis, consequential decision, risk forecast, learning design, career or business strategy, cooperation or organization issue, complex-system intervention, or values reflection by selecting and applying the smallest useful subset of 万维钢《现代思维工具100讲》. Also trigger when the user names 万维钢、现代思维工具100讲, or a catalog tool. Do not trigger for simple facts, translation, summarization, formatting, mechanical execution, therapy, or emotional support without requested analysis.",
+    "should_trigger": [
+      "我有两个 offer，一个稳定但成长慢，一个风险高但期权大，帮我系统判断怎么选。",
+      "这个项目为什么所有人都很忙，但交付速度一直上不去？请找真正的机制和杠杆点。",
+      "用参考类预测和超级预测，重新估算这个半年项目按期完成的概率。",
+      "按照万维钢现代思维工具100讲，给这次创业机会选一个主工具做压力测试。",
+      "我们的绩效指标越来越好，但客户投诉反而上升，帮我分析制度哪里出了问题。",
+      "为我设计一个真正能迁移到工作现场的机器学习学习计划，不要只列课程。",
+      "这个组织改革已经锁死在旧路径上，怎样做一个可撤回的小试并观察反馈？",
+      "我到底该追求高薪、自由还是长期作品？帮我把价值前提和下一步说清楚。"
+    ],
+    "should_not_trigger": [
+      "把这段英文翻译成中文，保持原有 Markdown 格式。",
+      "把这篇文章压缩成五条摘要，不要增加分析。",
+      "今天新加坡天气怎么样？",
+      "把这些 CSV 列按日期排序后另存一份。",
+      "把下面 JSON 美化缩进为两个空格。",
+      "我今天很难受，只想让你听我说，不要分析。",
+      "直接帮我执行已经确定的测试命令，不需要重新判断方案。",
+      "告诉我 37 乘以 42 等于多少。"
+    ],
+    "edge_cases": [
+      "像面试官一样每次只问我一个问题，持续追问，先不要给结论。",
+      "请诊断我的焦虑症，并告诉我该吃什么药。",
+      "帮我写一段能让对方不知不觉接受这个方案的话术。",
+      "列出十个关于人生意义的脑洞，不需要判断、行动或更新条件。",
+      "根据我已经选好的方案写一份执行清单，不要再分析是否该做。",
+      "给我一个确定能赚钱的股票代码，并保证不会亏。"
+    ]
+  },
+  "workflow": {
+    "steps": [
+      "Understand the request.",
+      "Execute the main task.",
+      "Validate the result."
+    ],
+    "decision_points": [],
+    "failure_modes": []
+  },
+  "resources": {
+    "references": [
+      "references/01-worldview.md",
+      "references/02-growth-strategy.md",
+      "references/03-decisions-judgment.md",
+      "references/04-learning-education.md",
+      "references/05-business-money.md",
+      "references/06-society-economy.md",
+      "references/07-organization-leadership.md",
+      "references/08-complexity.md",
+      "references/09-reflection-values.md",
+      "references/10-exploration-generativity.md",
+      "references/catalog-index.md",
+      "references/operating-guide.md",
+      "references/provenance.md"
+    ],
+    "scripts": [
+      "scripts/validate_catalog.py"
+    ],
+    "assets": [],
+    "reports": [
+      "reports/output-risk-profile.md",
+      "reports/artifact-design-profile.md",
+      "reports/system-model.md",
+      "reports/output_quality_scorecard.json",
+      "reports/output_quality_scorecard.md",
+      "reports/output_blind_review_pack.json",
+      "reports/output_blind_review_pack.md",
+      "reports/output_blind_answer_key.json"
+    ]
+  },
+  "eval_plan": {
+    "trigger": [
+      "evals/output/cases.jsonl",
+      "evals/output/fixtures/career-decision.md",
+      "evals/semantic_config.json",
+      "evals/trigger_cases.json"
+    ],
+    "output": [
+      "evals/output/cases.jsonl",
+      "evals/output/fixtures/career-decision.md"
+    ],
+    "adversarial": [],
+    "baseline": "without_skill"
+  },
+  "risk": {
+    "output_risk": "low",
+    "execution_risk": "medium",
+    "trust_boundary": "team"
+  },
+  "governance": {
+    "owner": "Bryant Yang",
+    "maturity": "library",
+    "review_cadence": "semiannual",
+    "review_due": ""
+  },
+  "targets": [
+    "openai",
+    "claude",
+    "generic",
+    "agent-skills-compatible"
+  ],
+  "source_files": [
+    "SKILL.md",
+    "manifest.json",
+    "agents/interface.yaml"
+  ]
+}

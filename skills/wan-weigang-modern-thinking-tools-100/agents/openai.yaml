@@ -1,0 +1,7 @@
+interface:
+  display_name: "现代思维工具100讲"
+  short_description: "复杂分析、决策、风险与系统问题的思维工具路由器"
+  default_prompt: "Use $wan-weigang-modern-thinking-tools-100 to analyze this problem with one primary tool, explicit evidence boundaries, concrete action, and update conditions."
+
+policy:
+  allow_implicit_invocation: true

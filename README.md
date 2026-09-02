@@ -87,6 +87,18 @@ cp skills/image/config.env.example skills/image/config.env
 
 依赖：Python 3.11+
 
+---
+
+### `wan-weigang-modern-thinking-tools-100`
+
+面向复杂分析与决策的思维工具路由器。先建立问题模型，再从一百个工具中选择一个
+主工具和至多三个补充或反证工具，交付结论、机制、行动与更新条件。工具正文按十个
+板块延迟加载，并包含触发、输出、目录完整性和跨平台回归证据。
+
+入口：`skills/wan-weigang-modern-thinking-tools-100/SKILL.md`
+
+依赖：Python 3.11+（仅维护校验脚本；普通使用无运行时依赖）
+
 ## 从本机 Skill 源同步
 
 仓库只同步白名单中的真实 Skill，不同步嵌套 Git 元数据、缓存或评测工作区：
