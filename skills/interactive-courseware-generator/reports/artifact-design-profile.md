@@ -5,9 +5,9 @@ Design system: `review studio`
 
 ## Primary Artifact Direction
 
-**Code, CLI, or implementation guide**
+**Interactive tutorial or compact courseware suite**
 
-Execution-focused technical artifact with environment assumptions, copyable commands, expected outputs, and side effects made explicit.
+Learning-focused interactive artifact with one question, one primary action, one observable phenomenon and one conclusion per page; practical commands and deeper protocol detail appear progressively.
 
 ## Matched Artifact Families
 
@@ -38,6 +38,10 @@ Execution-focused technical artifact with environment assumptions, copyable comm
 
 ## Layout Patterns To Prefer
 
+- one learner question per page
+- one primary action and one visual focus
+- progressive disclosure for commands, derivations, and traces
+- one real scenario across a compact courseware suite
 - prerequisites
 - commands
 - expected output
@@ -78,6 +82,9 @@ Execution-focused technical artifact with environment assumptions, copyable comm
 - Pair every major step with a visible success check.
 - Do not add screenshots unless they are real, current, and action-relevant.
 - Keep the first screen useful without requiring the reader to parse every detail.
+- Choose page count from learner questions and prerequisite relationships, not term count.
+- Keep comparable modes in one visual model instead of creating one page per mode.
+- Require a concrete real-world input and result; technical topics also include a minimal runnable usage path.
 - Use tables only for comparisons; move explanations below the table.
 
 ## Anti-Patterns
@@ -87,6 +94,7 @@ Execution-focused technical artifact with environment assumptions, copyable comm
 - Do not let Markdown tables become the default shape for every comparison or explanation.
 - Do not turn reviewer evidence into user-facing clutter.
 - Do not invent screenshots, citations, charts, or UI states.
+- Do not turn concept pages into dashboards or expose capstone complexity before it is needed.
 
 ## Reviewer Note
 

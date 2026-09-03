@@ -1,6 +1,6 @@
 # 交互式课件生成器
 
-将一个知识点生成或修改为一页可运行、可操作、可观察、可验证的自包含 HTML 课件。
+将一个知识点或紧凑主题生成、修改或精简为可运行、可操作、可观察、可验证的自包含 HTML 课件。既支持单页模拟器，也支持同一目录中默认 2–4 个概念页与可选综合实验。
 
 ## 使用
 
@@ -18,11 +18,29 @@
 不要生成 HTML，只输出一套“二分查找”交互课件的完整提示词。
 ```
 
+也可以生成紧凑课件组：
+
+```text
+使用 $interactive-courseware-generator，
+做一套 MQTT 入门交互课件。用同一个设备消息案例讲清用途、Topic 路由和 QoS；
+不要按术语过度拆页，命令和完整协议轨迹按需展开。
+```
+
 默认直接构建时交付：
 
 ```text
 courseware/<slug>/<slug>.html
 courseware/<slug>/<slug>.verification.md
+```
+
+紧凑课件组默认交付：
+
+```text
+courseware/<topic>/index.html
+courseware/<topic>/01-<concept>.html
+courseware/<topic>/01-<concept>.verification.md
+courseware/<topic>/...
+courseware/<topic>/README.md
 ```
 
 需要讲解编排时，额外交付 `<slug>.actions.json`；宿主控制本身只启用 HTML 内的消息桥接。
@@ -31,6 +49,8 @@ courseware/<slug>/<slug>.verification.md
 
 ```text
 教学目标
+  → 判断单页或紧凑课件组
+  → 用真实任务与贯穿案例确定最短学习路径
   → 知识点—变量—控件—现象—对比—结论映射
   → 自包含 HTML
   → courseware-config 与可选宿主桥接
@@ -42,11 +62,13 @@ courseware/<slug>/<slug>.verification.md
 
 - `SKILL.md`：触发、工作流、输出和完成标准。
 - `references/generation-framework.md`：三层中文提示词框架。
+- `references/course-suite-framework.md`：紧凑课件组的页数、贯穿案例、四拍结构与目录合同。
 - `references/runtime-contract.md`：项目无关的运行和教学动作协议。
 - `references/quality-gates.md`：验证合同。
 - `references/pwm-example.md`：PWM worked example。
 - `scripts/validate-courseware.js`：无第三方依赖的静态校验器。
 - `evals/trigger_cases.json`：触发、排除和近邻案例。
+- `evals/test-skill-contract.js`：紧凑课件组、四拍结构、真实用法和认知负担合同回归。
 - `reports/output_quality_scorecard.md`：记录夹具的输出合同对比，不是模型执行证据。
 
 ## 验证器

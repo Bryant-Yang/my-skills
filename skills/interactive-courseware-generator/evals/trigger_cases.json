@@ -5,13 +5,16 @@
     "把光的折射做成一个可以拖动入射角的教学模拟器。",
     "用这套方法给我产出一份细胞膜运输课件的 system prompt、user prompt 和教学动作 prompt。",
     "这个现有的 HTML 电路课件重置失效了，请按课件合同修好并重新验证。",
-    "Create a self-contained interactive teaching page for binary search with controls and observable state changes."
+    "Create a self-contained interactive teaching page for binary search with controls and observable state changes.",
+    "给我做一套 MQTT 入门 HTML 课件，放在一个目录里，讲清楚有什么用、怎么收发消息和 QoS，别拆成太多页。",
+    "这套交互课件信息太多了，帮我降低干扰，保留主实验，把命令和推导按需展开。",
+    "把 Docker 网络这个主题做成三四个有前后顺序的交互学习页，用同一个服务部署案例串起来。"
   ],
   "should_not_trigger": [
     "给我做一套二十页的静态 PowerPoint。",
     "设计一个公司产品官网首页。",
     "解释一下 iframe 的 sandbox 属性。",
-    "帮我列一份高中物理整学期课程大纲，不需要制作具体课件。",
+    "帮我列一份高中物理整学期课程大纲，不需要制作具体交互页面。",
     "把这段教学文字翻译成英文。"
   ],
   "near_neighbor": [
@@ -19,6 +22,8 @@
     "帮我做一个普通的 PWM 在线计算器，不用于教学。",
     "给我写一份交互式课件产品需求文档，暂时不要实现页面。",
     "制作一个包含多个页面、登录和后台管理的在线教学平台。",
-    "只生成一张解释牛顿第二定律的静态信息图。"
+    "只生成一张解释牛顿第二定律的静态信息图。",
+    "把这份已有的二十页 PowerPoint 排版统一一下，不需要 HTML 或交互。",
+    "为在线教育产品设计课程目录、登录、付费和教师后台。"
   ]
 }

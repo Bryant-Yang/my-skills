@@ -632,12 +632,13 @@
           },
           {
             "id": "states-boundary",
-            "description": "Output names the owned boundary.",
+            "description": "Output names the current owned boundary.",
             "weight": 1.0,
             "failure_type": "missing_boundary",
             "passed": false,
             "missing": [
-              "一页交互式 HTML 课件"
+              "单页或紧凑课件组",
+              "不负责静态幻灯片"
             ],
             "present_forbidden": []
           },
@@ -667,12 +668,13 @@
           },
           {
             "id": "states-boundary",
-            "description": "Output names the owned boundary.",
+            "description": "Output names the current owned boundary.",
             "weight": 1.0,
             "failure_type": "missing_boundary",
             "passed": false,
             "missing": [
-              "一页交互式 HTML 课件"
+              "单页或紧凑课件组",
+              "不负责静态幻灯片"
             ],
             "present_forbidden": []
           },
@@ -705,7 +707,7 @@
           },
           {
             "id": "states-boundary",
-            "description": "Output names the owned boundary.",
+            "description": "Output names the current owned boundary.",
             "weight": 1.0,
             "failure_type": "missing_boundary",
             "passed": true,

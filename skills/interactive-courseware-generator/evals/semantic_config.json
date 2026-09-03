@@ -1,24 +1,28 @@
 {
   "optimizer_hints": {
-    "capability": "把单个知识点生成或修改为一页可运行、可操作、可观察的交互式 HTML 教学课件，并产出提示词、教学动作和验证结果",
+    "capability": "把单个知识点或紧凑主题生成、精简或修改为低干扰、贴近实际、可运行且可观察的单页或同目录交互式 HTML 课件组，并产出提示词、教学动作和验证结果",
     "inputs": [
       "教学主题",
       "学习目标",
       "学习者",
       "可调变量",
       "可观察现象",
-      "现有 HTML 课件"
+      "现有 HTML 课件",
+      "需要先后回答的学习问题",
+      "贯穿全套课件的真实任务"
     ],
     "trigger_actions": [
       "生成一页交互课件",
       "制作 HTML 教学模拟器",
       "把知识点变成交互式网页课件",
       "产出交互课件提示词",
-      "修改并验证现有交互课件"
+      "修改并验证现有交互课件",
+      "生成同目录的紧凑多页课件",
+      "精简复杂课件并渐进展开细节"
     ],
     "exclusions": [
       "静态 PPT",
-      "整门课程大纲",
+      "学期级课程大纲",
       "普通网站",
       "只解释源码",
       "教学平台开发"
@@ -27,18 +31,20 @@
       "HTML 课件",
       "课件提示词",
       "教学动作 JSON",
-      "验证报告"
+      "验证报告",
+      "目录页与紧凑课件组"
     ]
   },
   "fallback_positive_concepts": [
     "generate_courseware",
     "interactive_html",
     "prompt_package",
-    "repair_courseware"
+    "repair_courseware",
+    "course_suite"
   ],
   "positive_concepts": {
     "generate_courseware": {
-      "weight": 0.36,
+      "weight": 0.3,
       "phrases": [
         "生成一页交互课件",
         "一页交互式教学课件",
@@ -50,7 +56,7 @@
       ]
     },
     "interactive_html": {
-      "weight": 0.26,
+      "weight": 0.22,
       "phrases": [
         "html 课件",
         "html 教学",
@@ -61,7 +67,7 @@
       ]
     },
     "prompt_package": {
-      "weight": 0.2,
+      "weight": 0.16,
       "phrases": [
         "课件提示词",
         "课件生成提示词",
@@ -80,7 +86,21 @@
         "修好课件",
         "课件重置",
         "课件合同",
-        "验证现有交互课件"
+        "验证现有交互课件",
+        "课件太复杂",
+        "降低干扰",
+        "渐进展开"
+      ]
+    },
+    "course_suite": {
+      "weight": 0.14,
+      "phrases": [
+        "一套交互课件",
+        "同一个目录",
+        "多页 html 课件",
+        "协议入门课件",
+        "别拆成太多页",
+        "compact courseware suite"
       ]
     },
     "causal_learning": {

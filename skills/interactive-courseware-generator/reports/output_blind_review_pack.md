@@ -83,7 +83,7 @@ Prompt: 制作一套二十页静态 PPT，包含封面、目录和总结。
 
 Rubric:
 - `declines-route` (1.0): Output says the request is outside this skill.
-- `states-boundary` (1.0): Output names the owned boundary.
+- `states-boundary` (1.0): Output names the current owned boundary.
 - `routes-neighbor` (1.0): Output routes to presentation work.
 
 ### Variant A
@@ -92,4 +92,4 @@ Rubric:
 
 ### Variant B
 
-这不是本 skill 的任务：它只负责一页交互式 HTML 课件。应改用演示文稿/PPT 制作能力，并保留封面、目录、内容页和总结的整套幻灯片结构。
+这不是本 skill 的任务：它负责单页或紧凑课件组形式的交互式 HTML 课件，不负责静态幻灯片。应改用演示文稿/PPT 制作能力，并保留封面、目录、内容页和总结的整套幻灯片结构。

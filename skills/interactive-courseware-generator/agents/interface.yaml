@@ -1,7 +1,7 @@
 interface:
   display_name: "交互式课件生成器"
-  short_description: "把单个知识点生成一页可操作、可观察、可验证的 HTML 课件"
-  default_prompt: "使用 $interactive-courseware-generator，把我给出的主题和教学目标生成一页交互式 HTML 课件，并交付验证报告；只有需要讲解编排时才生成教学动作。"
+  short_description: "生成单页或紧凑多页、低干扰且可验证的交互式 HTML 课件"
+  default_prompt: "使用 $interactive-courseware-generator，把我给出的知识点或紧凑主题生成低干扰的交互式 HTML 课件；先判断单页还是同目录课件组，用具体案例贯穿，说明解决什么问题，并为技术主题提供与交互同步的最小真实用法；交付验证报告，只有需要讲解编排时才生成教学动作。"
 compatibility:
   canonical_format: "agent-skills"
   adapter_targets:

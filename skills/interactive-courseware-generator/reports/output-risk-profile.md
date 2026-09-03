@@ -36,6 +36,9 @@ Generated skills often fail in small output details: generic headings, cluttered
 - Steps may explain what to do without naming the exact check that proves the step worked.
 - Tables can render as dense grids with weak hierarchy or poor mobile readability.
 - Long bullets can make the output look complete while hiding the actual decision logic.
+- A topic outline can be mistaken for a page plan, producing one page per term or mode.
+- Titles, goals, scenarios, controls, presets, metrics, traces, and explanations can all compete on the initial screen.
+- Abstract definitions can crowd out the concrete problem and the smallest real command, code, or configuration needed to use the concept.
 
 ## Output Constraints To Apply
 
@@ -45,6 +48,9 @@ Generated skills often fail in small output details: generic headings, cluttered
 - Pair each major step with a visible success check or expected intermediate output.
 - Use tables only when comparison is the main job; otherwise prefer compact cards or grouped bullets.
 - Keep table cells short and move explanations below the table.
+- Keep each page to one learner question, one primary action, one visual focus, and one conclusion.
+- Put commands, derivations, full rules, and protocol traces behind clearly named progressive disclosure.
+- Reuse one concrete scenario across pages and keep same-model comparisons on one page.
 
 ## Self-Repair Checks
 
@@ -54,6 +60,9 @@ Generated skills often fail in small output details: generic headings, cluttered
 - Scan every numbered step for a missing verification cue.
 - Preview whether each table still reads well when columns are narrow.
 - Convert any table with paragraph-length cells into bullets or cards.
+- Count independent learner questions rather than vocabulary terms when deciding page count.
+- Inspect the initial viewport and remove any region that does not help the learner act or interpret the core result.
+- Confirm technical courseware explains both what the concept is for and how to use it in a minimal real environment.
 
 ## Reviewer Note
 
