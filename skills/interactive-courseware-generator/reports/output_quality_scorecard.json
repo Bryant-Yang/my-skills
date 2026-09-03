@@ -1,0 +1,744 @@
+{
+  "ok": true,
+  "cases": "evals/output/cases.jsonl",
+  "summary": {
+    "case_count": 5,
+    "file_backed_case_count": 1,
+    "near_neighbor_case_count": 1,
+    "boundary_case_count": 1,
+    "baseline_pass_rate": 0.0,
+    "with_skill_pass_rate": 100.0,
+    "delta": 100.0,
+    "regression_count": 0,
+    "gate_pass": true,
+    "failure_taxonomy": [],
+    "blind_pair_count": 5
+  },
+  "results": [
+    {
+      "id": "build-interactive-page",
+      "prompt": "生成一页牛顿第二定律交互课件。",
+      "input_files": [],
+      "metadata": {},
+      "baseline": {
+        "score": 0.0,
+        "passed_count": 0,
+        "failed_count": 4,
+        "checks": [
+          {
+            "id": "interaction-map",
+            "description": "Output uses the causal interaction map.",
+            "weight": 1.0,
+            "failure_type": "missing_teaching_contract",
+            "passed": false,
+            "missing": [
+              "知识点→变量→控件→可观察现象→对比状态→因果结论"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "core-artifacts",
+            "description": "Output names HTML and verification artifacts.",
+            "weight": 1.0,
+            "failure_type": "missing_artifacts",
+            "passed": false,
+            "missing": [
+              ".html",
+              ".verification.md"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "runtime-contract",
+            "description": "Output includes the neutral runtime contract.",
+            "weight": 1.0,
+            "failure_type": "missing_runtime_contract",
+            "passed": false,
+            "missing": [
+              "courseware-config",
+              "脱离宿主独立运行"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "real-validation",
+            "description": "Output promises deterministic validation rather than self-check only.",
+            "weight": 1.0,
+            "failure_type": "missing_validation",
+            "passed": false,
+            "missing": [
+              "确定性验证"
+            ],
+            "present_forbidden": []
+          }
+        ],
+        "failed": [
+          {
+            "id": "interaction-map",
+            "description": "Output uses the causal interaction map.",
+            "weight": 1.0,
+            "failure_type": "missing_teaching_contract",
+            "passed": false,
+            "missing": [
+              "知识点→变量→控件→可观察现象→对比状态→因果结论"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "core-artifacts",
+            "description": "Output names HTML and verification artifacts.",
+            "weight": 1.0,
+            "failure_type": "missing_artifacts",
+            "passed": false,
+            "missing": [
+              ".html",
+              ".verification.md"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "runtime-contract",
+            "description": "Output includes the neutral runtime contract.",
+            "weight": 1.0,
+            "failure_type": "missing_runtime_contract",
+            "passed": false,
+            "missing": [
+              "courseware-config",
+              "脱离宿主独立运行"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "real-validation",
+            "description": "Output promises deterministic validation rather than self-check only.",
+            "weight": 1.0,
+            "failure_type": "missing_validation",
+            "passed": false,
+            "missing": [
+              "确定性验证"
+            ],
+            "present_forbidden": []
+          }
+        ]
+      },
+      "with_skill": {
+        "score": 100.0,
+        "passed_count": 4,
+        "failed_count": 0,
+        "checks": [
+          {
+            "id": "interaction-map",
+            "description": "Output uses the causal interaction map.",
+            "weight": 1.0,
+            "failure_type": "missing_teaching_contract",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "core-artifacts",
+            "description": "Output names HTML and verification artifacts.",
+            "weight": 1.0,
+            "failure_type": "missing_artifacts",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "runtime-contract",
+            "description": "Output includes the neutral runtime contract.",
+            "weight": 1.0,
+            "failure_type": "missing_runtime_contract",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "real-validation",
+            "description": "Output promises deterministic validation rather than self-check only.",
+            "weight": 1.0,
+            "failure_type": "missing_validation",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          }
+        ],
+        "failed": []
+      },
+      "delta": 100.0,
+      "winner": "with_skill",
+      "failure_taxonomy": []
+    },
+    {
+      "id": "prompt-only-mode",
+      "prompt": "不要生成 HTML，只给我一份可以复用的折射模拟课件提示词。",
+      "input_files": [],
+      "metadata": {},
+      "baseline": {
+        "score": 0.0,
+        "passed_count": 0,
+        "failed_count": 4,
+        "checks": [
+          {
+            "id": "prompt-artifact",
+            "description": "Output names the prompt artifact.",
+            "weight": 1.0,
+            "failure_type": "missing_prompt_artifact",
+            "passed": false,
+            "missing": [
+              ".prompt.md"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "three-prompt-layers",
+            "description": "Output includes all prompt layers.",
+            "weight": 1.0,
+            "failure_type": "incomplete_prompt_package",
+            "passed": false,
+            "missing": [
+              "system prompt",
+              "user prompt",
+              "教学动作 prompt"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "causal-map",
+            "description": "Output includes variable-to-phenomenon mapping.",
+            "weight": 1.0,
+            "failure_type": "missing_causal_map",
+            "passed": false,
+            "missing": [
+              "变量—现象映射"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "honest-status",
+            "description": "Output does not pretend HTML was built.",
+            "weight": 1.0,
+            "failure_type": "false_verification",
+            "passed": false,
+            "missing": [
+              "未生成或验证 HTML"
+            ],
+            "present_forbidden": []
+          }
+        ],
+        "failed": [
+          {
+            "id": "prompt-artifact",
+            "description": "Output names the prompt artifact.",
+            "weight": 1.0,
+            "failure_type": "missing_prompt_artifact",
+            "passed": false,
+            "missing": [
+              ".prompt.md"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "three-prompt-layers",
+            "description": "Output includes all prompt layers.",
+            "weight": 1.0,
+            "failure_type": "incomplete_prompt_package",
+            "passed": false,
+            "missing": [
+              "system prompt",
+              "user prompt",
+              "教学动作 prompt"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "causal-map",
+            "description": "Output includes variable-to-phenomenon mapping.",
+            "weight": 1.0,
+            "failure_type": "missing_causal_map",
+            "passed": false,
+            "missing": [
+              "变量—现象映射"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "honest-status",
+            "description": "Output does not pretend HTML was built.",
+            "weight": 1.0,
+            "failure_type": "false_verification",
+            "passed": false,
+            "missing": [
+              "未生成或验证 HTML"
+            ],
+            "present_forbidden": []
+          }
+        ]
+      },
+      "with_skill": {
+        "score": 100.0,
+        "passed_count": 4,
+        "failed_count": 0,
+        "checks": [
+          {
+            "id": "prompt-artifact",
+            "description": "Output names the prompt artifact.",
+            "weight": 1.0,
+            "failure_type": "missing_prompt_artifact",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "three-prompt-layers",
+            "description": "Output includes all prompt layers.",
+            "weight": 1.0,
+            "failure_type": "incomplete_prompt_package",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "causal-map",
+            "description": "Output includes variable-to-phenomenon mapping.",
+            "weight": 1.0,
+            "failure_type": "missing_causal_map",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "honest-status",
+            "description": "Output does not pretend HTML was built.",
+            "weight": 1.0,
+            "failure_type": "false_verification",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          }
+        ],
+        "failed": []
+      },
+      "delta": 100.0,
+      "winner": "with_skill",
+      "failure_taxonomy": []
+    },
+    {
+      "id": "repair-existing-page",
+      "prompt": "这个波动模拟 HTML 的暂停和重置有问题，请修好。",
+      "input_files": [
+        "fixtures/broken-state-courseware.html"
+      ],
+      "metadata": {
+        "case_type": "file-backed fixture"
+      },
+      "baseline": {
+        "score": 0.0,
+        "passed_count": 0,
+        "failed_count": 4,
+        "checks": [
+          {
+            "id": "scope-control",
+            "description": "Output preserves existing courseware and limits change.",
+            "weight": 1.0,
+            "failure_type": "scope_expansion",
+            "passed": false,
+            "missing": [
+              "保留现有课件",
+              "只修复"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "state-machine",
+            "description": "Output names the required state model and reset behavior.",
+            "weight": 1.0,
+            "failure_type": "incomplete_state_repair",
+            "passed": false,
+            "missing": [
+              "running/paused/ended",
+              "reset 全量恢复"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "regression",
+            "description": "Output plans relevant regression checks.",
+            "weight": 1.0,
+            "failure_type": "missing_regression",
+            "passed": false,
+            "missing": [
+              "hostBridge",
+              "移动视口"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "status-boundary",
+            "description": "Output preserves honest validation labels.",
+            "weight": 1.0,
+            "failure_type": "false_completion",
+            "passed": false,
+            "missing": [
+              "已通过、警告、未检查"
+            ],
+            "present_forbidden": []
+          }
+        ],
+        "failed": [
+          {
+            "id": "scope-control",
+            "description": "Output preserves existing courseware and limits change.",
+            "weight": 1.0,
+            "failure_type": "scope_expansion",
+            "passed": false,
+            "missing": [
+              "保留现有课件",
+              "只修复"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "state-machine",
+            "description": "Output names the required state model and reset behavior.",
+            "weight": 1.0,
+            "failure_type": "incomplete_state_repair",
+            "passed": false,
+            "missing": [
+              "running/paused/ended",
+              "reset 全量恢复"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "regression",
+            "description": "Output plans relevant regression checks.",
+            "weight": 1.0,
+            "failure_type": "missing_regression",
+            "passed": false,
+            "missing": [
+              "hostBridge",
+              "移动视口"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "status-boundary",
+            "description": "Output preserves honest validation labels.",
+            "weight": 1.0,
+            "failure_type": "false_completion",
+            "passed": false,
+            "missing": [
+              "已通过、警告、未检查"
+            ],
+            "present_forbidden": []
+          }
+        ]
+      },
+      "with_skill": {
+        "score": 100.0,
+        "passed_count": 4,
+        "failed_count": 0,
+        "checks": [
+          {
+            "id": "scope-control",
+            "description": "Output preserves existing courseware and limits change.",
+            "weight": 1.0,
+            "failure_type": "scope_expansion",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "state-machine",
+            "description": "Output names the required state model and reset behavior.",
+            "weight": 1.0,
+            "failure_type": "incomplete_state_repair",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "regression",
+            "description": "Output plans relevant regression checks.",
+            "weight": 1.0,
+            "failure_type": "missing_regression",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "status-boundary",
+            "description": "Output preserves honest validation labels.",
+            "weight": 1.0,
+            "failure_type": "false_completion",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          }
+        ],
+        "failed": []
+      },
+      "delta": 100.0,
+      "winner": "with_skill",
+      "failure_taxonomy": []
+    },
+    {
+      "id": "domain-correctness-boundary",
+      "prompt": "做一个舵机 PWM 角度模拟页，保证绝对准确。",
+      "input_files": [],
+      "metadata": {
+        "case_type": "boundary"
+      },
+      "baseline": {
+        "score": 0.0,
+        "passed_count": 0,
+        "failed_count": 3,
+        "checks": [
+          {
+            "id": "model-required",
+            "description": "Output asks for the actual servo signal model.",
+            "weight": 1.0,
+            "failure_type": "missing_domain_model",
+            "passed": false,
+            "missing": [
+              "脉宽、周期和角度模型"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "rejects-false-equivalence",
+            "description": "Output rejects naive duty-cycle mapping.",
+            "weight": 1.0,
+            "failure_type": "scientific_error",
+            "passed": false,
+            "missing": [
+              "不能把一般占空比直接等同于角度"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "honest-domain-status",
+            "description": "Output discloses domain validation status.",
+            "weight": 1.0,
+            "failure_type": "false_domain_claim",
+            "passed": false,
+            "missing": [
+              "学科正确性标为待复核",
+              "不声称绝对准确"
+            ],
+            "present_forbidden": []
+          }
+        ],
+        "failed": [
+          {
+            "id": "model-required",
+            "description": "Output asks for the actual servo signal model.",
+            "weight": 1.0,
+            "failure_type": "missing_domain_model",
+            "passed": false,
+            "missing": [
+              "脉宽、周期和角度模型"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "rejects-false-equivalence",
+            "description": "Output rejects naive duty-cycle mapping.",
+            "weight": 1.0,
+            "failure_type": "scientific_error",
+            "passed": false,
+            "missing": [
+              "不能把一般占空比直接等同于角度"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "honest-domain-status",
+            "description": "Output discloses domain validation status.",
+            "weight": 1.0,
+            "failure_type": "false_domain_claim",
+            "passed": false,
+            "missing": [
+              "学科正确性标为待复核",
+              "不声称绝对准确"
+            ],
+            "present_forbidden": []
+          }
+        ]
+      },
+      "with_skill": {
+        "score": 100.0,
+        "passed_count": 3,
+        "failed_count": 0,
+        "checks": [
+          {
+            "id": "model-required",
+            "description": "Output asks for the actual servo signal model.",
+            "weight": 1.0,
+            "failure_type": "missing_domain_model",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "rejects-false-equivalence",
+            "description": "Output rejects naive duty-cycle mapping.",
+            "weight": 1.0,
+            "failure_type": "scientific_error",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "honest-domain-status",
+            "description": "Output discloses domain validation status.",
+            "weight": 1.0,
+            "failure_type": "false_domain_claim",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          }
+        ],
+        "failed": []
+      },
+      "delta": 100.0,
+      "winner": "with_skill",
+      "failure_taxonomy": []
+    },
+    {
+      "id": "near-neighbor-static-deck",
+      "prompt": "制作一套二十页静态 PPT，包含封面、目录和总结。",
+      "input_files": [],
+      "metadata": {
+        "case_type": "near_neighbor"
+      },
+      "baseline": {
+        "score": 0.0,
+        "passed_count": 0,
+        "failed_count": 3,
+        "checks": [
+          {
+            "id": "declines-route",
+            "description": "Output says the request is outside this skill.",
+            "weight": 1.0,
+            "failure_type": "over_trigger",
+            "passed": false,
+            "missing": [
+              "不是本 skill 的任务"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "states-boundary",
+            "description": "Output names the owned boundary.",
+            "weight": 1.0,
+            "failure_type": "missing_boundary",
+            "passed": false,
+            "missing": [
+              "一页交互式 HTML 课件"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "routes-neighbor",
+            "description": "Output routes to presentation work.",
+            "weight": 1.0,
+            "failure_type": "wrong_neighbor",
+            "passed": false,
+            "missing": [
+              "演示文稿/PPT 制作能力"
+            ],
+            "present_forbidden": []
+          }
+        ],
+        "failed": [
+          {
+            "id": "declines-route",
+            "description": "Output says the request is outside this skill.",
+            "weight": 1.0,
+            "failure_type": "over_trigger",
+            "passed": false,
+            "missing": [
+              "不是本 skill 的任务"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "states-boundary",
+            "description": "Output names the owned boundary.",
+            "weight": 1.0,
+            "failure_type": "missing_boundary",
+            "passed": false,
+            "missing": [
+              "一页交互式 HTML 课件"
+            ],
+            "present_forbidden": []
+          },
+          {
+            "id": "routes-neighbor",
+            "description": "Output routes to presentation work.",
+            "weight": 1.0,
+            "failure_type": "wrong_neighbor",
+            "passed": false,
+            "missing": [
+              "演示文稿/PPT 制作能力"
+            ],
+            "present_forbidden": []
+          }
+        ]
+      },
+      "with_skill": {
+        "score": 100.0,
+        "passed_count": 3,
+        "failed_count": 0,
+        "checks": [
+          {
+            "id": "declines-route",
+            "description": "Output says the request is outside this skill.",
+            "weight": 1.0,
+            "failure_type": "over_trigger",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "states-boundary",
+            "description": "Output names the owned boundary.",
+            "weight": 1.0,
+            "failure_type": "missing_boundary",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          },
+          {
+            "id": "routes-neighbor",
+            "description": "Output routes to presentation work.",
+            "weight": 1.0,
+            "failure_type": "wrong_neighbor",
+            "passed": true,
+            "missing": [],
+            "present_forbidden": []
+          }
+        ],
+        "failed": []
+      },
+      "delta": 100.0,
+      "winner": "with_skill",
+      "failure_taxonomy": []
+    }
+  ],
+  "failures": [],
+  "blind_review": {
+    "pack": "reports/output_blind_review_pack.json",
+    "answer_key": "reports/output_blind_answer_key.json",
+    "pair_count": 5
+  },
+  "artifacts": {
+    "json": "reports/output_quality_scorecard.json",
+    "markdown": "reports/output_quality_scorecard.md",
+    "blind_review_pack_json": "reports/output_blind_review_pack.json",
+    "blind_review_pack_md": "reports/output_blind_review_pack.md",
+    "blind_answer_key_json": "reports/output_blind_answer_key.json"
+  }
+}

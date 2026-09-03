@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>待修复的状态模拟</title>
+</head>
+<body>
+  <button id="start-btn" type="button">启动</button>
+  <button id="pause-btn" type="button">暂停</button>
+  <button id="reset-btn" type="button">重置</button>
+  <canvas id="canvas" width="640" height="360"></canvas>
+  <script>
+    let running = false;
+    let elapsed = 0;
+    document.getElementById('start-btn').onclick = () => { running = true; };
+    document.getElementById('pause-btn').onclick = () => { running = false; };
+    document.getElementById('reset-btn').onclick = () => { elapsed = 0; };
+  </script>
+</body>
+</html>

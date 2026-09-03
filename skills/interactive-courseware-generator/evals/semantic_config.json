@@ -1,0 +1,174 @@
+{
+  "optimizer_hints": {
+    "capability": "把单个知识点生成或修改为一页可运行、可操作、可观察的交互式 HTML 教学课件，并产出提示词、教学动作和验证结果",
+    "inputs": [
+      "教学主题",
+      "学习目标",
+      "学习者",
+      "可调变量",
+      "可观察现象",
+      "现有 HTML 课件"
+    ],
+    "trigger_actions": [
+      "生成一页交互课件",
+      "制作 HTML 教学模拟器",
+      "把知识点变成交互式网页课件",
+      "产出交互课件提示词",
+      "修改并验证现有交互课件"
+    ],
+    "exclusions": [
+      "静态 PPT",
+      "整门课程大纲",
+      "普通网站",
+      "只解释源码",
+      "教学平台开发"
+    ],
+    "artifacts": [
+      "HTML 课件",
+      "课件提示词",
+      "教学动作 JSON",
+      "验证报告"
+    ]
+  },
+  "fallback_positive_concepts": [
+    "generate_courseware",
+    "interactive_html",
+    "prompt_package",
+    "repair_courseware"
+  ],
+  "positive_concepts": {
+    "generate_courseware": {
+      "weight": 0.36,
+      "phrases": [
+        "生成一页交互课件",
+        "一页交互式教学课件",
+        "交互式课件",
+        "教学模拟器",
+        "教学 simulation",
+        "interactive teaching page",
+        "interactive courseware"
+      ]
+    },
+    "interactive_html": {
+      "weight": 0.26,
+      "phrases": [
+        "html 课件",
+        "html 教学",
+        "交互式 html",
+        "网页课件",
+        "self-contained interactive teaching page",
+        "controls and observable state changes"
+      ]
+    },
+    "prompt_package": {
+      "weight": 0.2,
+      "phrases": [
+        "课件提示词",
+        "课件生成提示词",
+        "system prompt",
+        "user prompt",
+        "教学动作 prompt",
+        "courseware prompt"
+      ]
+    },
+    "repair_courseware": {
+      "weight": 0.14,
+      "phrases": [
+        "生成/修改一页交互课件",
+        "修改一页交互课件",
+        "修改课件",
+        "修好课件",
+        "课件重置",
+        "课件合同",
+        "验证现有交互课件"
+      ]
+    },
+    "causal_learning": {
+      "weight": 0.04,
+      "phrases": [
+        "调节变量",
+        "观察现象",
+        "可操作可观察",
+        "observable outcomes"
+      ]
+    }
+  },
+  "negative_concepts": {
+    "static_slides": {
+      "weight": 0.45,
+      "exclusive": true,
+      "phrases": [
+        "静态 ppt",
+        "静态 powerpoint",
+        "二十页",
+        "整套幻灯片",
+        "static slide deck"
+      ]
+    },
+    "generic_website": {
+      "weight": 0.4,
+      "exclusive": true,
+      "phrases": [
+        "公司产品官网",
+        "普通网站",
+        "普通的 pwm 在线计算器",
+        "generic website"
+      ]
+    },
+    "outline_only": {
+      "weight": 0.36,
+      "exclusive": true,
+      "phrases": [
+        "整学期课程大纲",
+        "整门课程大纲",
+        "不需要制作具体课件",
+        "whole-course outline"
+      ]
+    },
+    "explain_only": {
+      "weight": 0.32,
+      "exclusive": true,
+      "phrases": [
+        "解释一下 iframe",
+        "分析课件平台源码",
+        "不要生成或修改课件",
+        "只解释源码"
+      ]
+    },
+    "full_platform": {
+      "weight": 0.38,
+      "exclusive": true,
+      "phrases": [
+        "在线教学平台",
+        "多个页面、登录和后台管理",
+        "full teaching platform"
+      ]
+    },
+    "translation_only": {
+      "weight": 0.45,
+      "exclusive": true,
+      "phrases": [
+        "翻译成英文",
+        "translate this teaching text"
+      ]
+    },
+    "static_visual": {
+      "weight": 0.34,
+      "exclusive": true,
+      "phrases": [
+        "静态信息图",
+        "static infographic"
+      ]
+    },
+    "product_spec_only": {
+      "weight": 0.4,
+      "exclusive": true,
+      "phrases": [
+        "交互式课件产品需求文档",
+        "产品需求文档",
+        "暂时不要实现页面",
+        "courseware product requirements"
+      ]
+    }
+  }
+}

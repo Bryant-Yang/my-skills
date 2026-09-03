@@ -1,0 +1,118 @@
+{
+  "schema_version": "2.0.0",
+  "name": "interactive-courseware-generator",
+  "title": "交互式课件生成器",
+  "job_to_be_done": "把一个教学知识点稳定转换为一页可运行、可操作、可观察、可验证的交互式 HTML 课件。",
+  "trigger_surface": {
+    "description": "把单个知识点设计、生成或修复为一页自包含、可操作、可观察、可验证的交互式 HTML 课件。用于用户要求生成一页交互课件、制作 HTML 教学模拟器、产出课件生成提示词，或修改并验证现有交互课件；输入通常包含主题、学习目标、学习者、变量、现象与学科模型。不用于静态幻灯片、整门课程大纲、普通网站、教学平台或只解释源码。",
+    "should_trigger": [
+      "帮我生成一页讲牛顿第二定律的交互式 HTML 课件，要能调质量和力并观察加速度。",
+      "把光的折射做成一个可以拖动入射角的教学模拟器。",
+      "用这套方法给我产出一份细胞膜运输课件的 system prompt、user prompt 和教学动作 prompt。",
+      "这个现有的 HTML 电路课件重置失效了，请按课件合同修好并重新验证。",
+      "Create a self-contained interactive teaching page for binary search with controls and observable state changes."
+    ],
+    "should_not_trigger": [
+      "给我做一套二十页的静态 PowerPoint。",
+      "设计一个公司产品官网首页。",
+      "解释一下 iframe 的 sandbox 属性。",
+      "帮我列一份高中物理整学期课程大纲，不需要制作具体课件。",
+      "把这段教学文字翻译成英文。",
+      "静态幻灯片",
+      "整门课程大纲",
+      "普通网站",
+      "教学平台",
+      "只解释源码"
+    ],
+    "edge_cases": [
+      "分析某个课件平台的生成源码，但不要生成或修改课件。",
+      "帮我做一个普通的 PWM 在线计算器，不用于教学。",
+      "给我写一份交互式课件产品需求文档，暂时不要实现页面。",
+      "制作一个包含多个页面、登录和后台管理的在线教学平台。",
+      "只生成一张解释牛顿第二定律的静态信息图。"
+    ]
+  },
+  "workflow": {
+    "steps": [
+      "从用户输入提炼一个单页教学目标。信息不足时推断受众、语言和视觉风格；只有不同选择会改变学科结论或课件类型时才提问。",
+      "建立“知识点 → 可调变量 → 控件 → 可观察现象 → 对比状态 → 因果结论”映射。每个变量必须有控件和可见结果。",
+      "先写课件规格，再按生成框架实现。具体布局、视觉和动画可以创作，但不得改变教学因果关系。",
+      "在 HTML 内嵌合法 `courseware-config` 并使用稳定 DOM ID。页面必须能独立运行；需要宿主控制时，再实现运行协议中的四类中性消息。",
+      "用户需要教学编排时，基于生成后的真实 DOM 选择器编写 3–8 个讲解/操作步骤；找不到真实目标时用讲解或状态动作，不猜选择器。",
+      "对 HTML 运行静态校验器；从本文件位置解析 `<skill-dir>`，不要假设用户当前目录就是 Skill 目录：",
+      "能使用浏览器时，继续检查桌面与移动布局、启动/暂停/重置、每个变量、所有预设、教学动作和控制台错误。修复失败后重新验证。"
+    ],
+    "decision_points": [
+      "**直接构建**：在用户指定目录输出 `<slug>.html` 和 `<slug>.verification.md`；需要讲解编排或宿主控制时再输出 `<slug>.actions.json`。未指定目录时使用当前工作区的 `courseware/<slug>/`。",
+      "**只要提示词**：输出 `<slug>.prompt.md`，包含教学规格、HTML system/user prompt 和教学动作 prompt，不伪造已生成或已验证的 HTML。",
+      "**修改现有课件**：保留用户已有内容，只修改目标行为，并重新运行相关门禁。"
+    ],
+    "failure_modes": [
+      "交互只有装饰变化，无法解释教学因果关系。",
+      "HTML 看似完整，但配置 JSON、内联脚本或状态机实际无效。",
+      "重置只恢复部分变量，导致初始状态不可复现。",
+      "教学动作引用不存在、重复或不可见的 DOM 目标。"
+    ]
+  },
+  "resources": {
+    "references": [
+      "references/design-rationale.md",
+      "references/generation-framework.md",
+      "references/pwm-example.md",
+      "references/quality-gates.md",
+      "references/runtime-contract.md"
+    ],
+    "scripts": [
+      "scripts/validate-courseware.js"
+    ],
+    "assets": [],
+    "reports": [
+      "reports/intent-context.json",
+      "reports/output-risk-profile.md",
+      "reports/artifact-design-profile.md",
+      "reports/system-model.md",
+      "reports/output_quality_scorecard.json",
+      "reports/output_quality_scorecard.md",
+      "reports/output_blind_review_pack.json",
+      "reports/output_blind_review_pack.md",
+      "reports/output_blind_answer_key.json"
+    ]
+  },
+  "eval_plan": {
+    "trigger": [
+      "evals/failure-cases.md",
+      "evals/output/cases.jsonl",
+      "evals/semantic_config.json",
+      "evals/trigger_cases.json"
+    ],
+    "output": [
+      "evals/output/cases.jsonl"
+    ],
+    "adversarial": [],
+    "baseline": "without_skill"
+  },
+  "risk": {
+    "output_risk": "low",
+    "execution_risk": "medium",
+    "trust_boundary": "team"
+  },
+  "governance": {
+    "owner": "Bryant Yang",
+    "maturity": "library",
+    "review_cadence": "monthly",
+    "review_due": ""
+  },
+  "targets": [
+    "openai",
+    "claude",
+    "generic",
+    "agent-skills-compatible",
+    "vscode"
+  ],
+  "source_files": [
+    "SKILL.md",
+    "manifest.json",
+    "agents/interface.yaml",
+    "reports/intent-context.json"
+  ]
+}

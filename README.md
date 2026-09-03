@@ -99,6 +99,18 @@ cp skills/image/config.env.example skills/image/config.env
 
 依赖：Python 3.11+（仅维护校验脚本；普通使用无运行时依赖）
 
+---
+
+### `interactive-courseware-generator`
+
+把单个知识点生成或修复为一页自包含、可操作、可观察、可验证的交互式 HTML
+课件。先建立“知识点—变量—控件—现象—对比—结论”映射，再生成页面、可选
+教学动作和诚实标注检查边界的验证报告。
+
+入口：`skills/interactive-courseware-generator/SKILL.md`
+
+依赖：Node.js 18+（仅用于确定性 HTML 校验器；生成页本身无第三方运行时依赖）
+
 ## 从本机 Skill 源同步
 
 仓库只同步白名单中的真实 Skill，不同步嵌套 Git 元数据、缓存或评测工作区：

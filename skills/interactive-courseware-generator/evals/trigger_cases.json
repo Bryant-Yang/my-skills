@@ -1,0 +1,24 @@
+{
+  "recommended_threshold": 0.15,
+  "should_trigger": [
+    "帮我生成一页讲牛顿第二定律的交互式 HTML 课件，要能调质量和力并观察加速度。",
+    "把光的折射做成一个可以拖动入射角的教学模拟器。",
+    "用这套方法给我产出一份细胞膜运输课件的 system prompt、user prompt 和教学动作 prompt。",
+    "这个现有的 HTML 电路课件重置失效了，请按课件合同修好并重新验证。",
+    "Create a self-contained interactive teaching page for binary search with controls and observable state changes."
+  ],
+  "should_not_trigger": [
+    "给我做一套二十页的静态 PowerPoint。",
+    "设计一个公司产品官网首页。",
+    "解释一下 iframe 的 sandbox 属性。",
+    "帮我列一份高中物理整学期课程大纲，不需要制作具体课件。",
+    "把这段教学文字翻译成英文。"
+  ],
+  "near_neighbor": [
+    "分析某个课件平台的生成源码，但不要生成或修改课件。",
+    "帮我做一个普通的 PWM 在线计算器，不用于教学。",
+    "给我写一份交互式课件产品需求文档，暂时不要实现页面。",
+    "制作一个包含多个页面、登录和后台管理的在线教学平台。",
+    "只生成一张解释牛顿第二定律的静态信息图。"
+  ]
+}
