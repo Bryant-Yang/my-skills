@@ -18,6 +18,7 @@
     "vscode"
   ],
   "factory_components": [
+    "agents",
     "references",
     "scripts",
     "evals",

@@ -1,56 +1,53 @@
 {
   "schema_version": "1.0",
   "seed": "yao-output-eval-blind-v1",
+  "evidence_mode": "recorded_fixture_contract_comparison",
   "summary": {
     "pair_count": 5,
-    "with_skill_expected_count": 5,
-    "baseline_expected_count": 0
+    "candidate_fixture_expected_count": 5,
+    "minimal_fixture_expected_count": 0,
+    "release_gate": false
   },
   "answers": [
     {
       "case_id": "build-interactive-page",
-      "variant_a_role": "with_skill",
-      "variant_b_role": "baseline",
-      "expected_winner_role": "with_skill",
-      "expected_winner_variant": "A",
-      "score_winner_role": "with_skill",
-      "delta": 100.0
+      "variant_a_fixture_role": "candidate_contract",
+      "variant_b_fixture_role": "minimal_baseline",
+      "expected_contract_winner_variant": "A",
+      "assertion_winner_variant": "A",
+      "fixture_score_delta": 100.0
     },
     {
       "case_id": "prompt-only-mode",
-      "variant_a_role": "baseline",
-      "variant_b_role": "with_skill",
-      "expected_winner_role": "with_skill",
-      "expected_winner_variant": "B",
-      "score_winner_role": "with_skill",
-      "delta": 100.0
+      "variant_a_fixture_role": "minimal_baseline",
+      "variant_b_fixture_role": "candidate_contract",
+      "expected_contract_winner_variant": "B",
+      "assertion_winner_variant": "B",
+      "fixture_score_delta": 100.0
     },
     {
       "case_id": "repair-existing-page",
-      "variant_a_role": "baseline",
-      "variant_b_role": "with_skill",
-      "expected_winner_role": "with_skill",
-      "expected_winner_variant": "B",
-      "score_winner_role": "with_skill",
-      "delta": 100.0
+      "variant_a_fixture_role": "minimal_baseline",
+      "variant_b_fixture_role": "candidate_contract",
+      "expected_contract_winner_variant": "B",
+      "assertion_winner_variant": "B",
+      "fixture_score_delta": 100.0
     },
     {
       "case_id": "domain-correctness-boundary",
-      "variant_a_role": "baseline",
-      "variant_b_role": "with_skill",
-      "expected_winner_role": "with_skill",
-      "expected_winner_variant": "B",
-      "score_winner_role": "with_skill",
-      "delta": 100.0
+      "variant_a_fixture_role": "minimal_baseline",
+      "variant_b_fixture_role": "candidate_contract",
+      "expected_contract_winner_variant": "B",
+      "assertion_winner_variant": "B",
+      "fixture_score_delta": 100.0
     },
     {
       "case_id": "near-neighbor-static-deck",
-      "variant_a_role": "baseline",
-      "variant_b_role": "with_skill",
-      "expected_winner_role": "with_skill",
-      "expected_winner_variant": "B",
-      "score_winner_role": "with_skill",
-      "delta": 100.0
+      "variant_a_fixture_role": "minimal_baseline",
+      "variant_b_fixture_role": "candidate_contract",
+      "expected_contract_winner_variant": "B",
+      "assertion_winner_variant": "B",
+      "fixture_score_delta": 100.0
     }
   ]
 }

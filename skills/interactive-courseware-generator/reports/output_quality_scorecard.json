@@ -1,16 +1,17 @@
 {
-  "ok": true,
+  "fixture_check_ok": true,
+  "evidence_mode": "recorded_fixture_contract_check",
   "cases": "evals/output/cases.jsonl",
   "summary": {
     "case_count": 5,
     "file_backed_case_count": 1,
     "near_neighbor_case_count": 1,
     "boundary_case_count": 1,
-    "baseline_pass_rate": 0.0,
-    "with_skill_pass_rate": 100.0,
-    "delta": 100.0,
-    "regression_count": 0,
-    "gate_pass": true,
+    "baseline_fixture_pass_rate": 0.0,
+    "with_skill_fixture_pass_rate": 100.0,
+    "fixture_score_delta": 100.0,
+    "fixture_regression_count": 0,
+    "release_gate": false,
     "failure_taxonomy": [],
     "blind_pair_count": 5
   },
@@ -20,7 +21,7 @@
       "prompt": "生成一页牛顿第二定律交互课件。",
       "input_files": [],
       "metadata": {},
-      "baseline": {
+      "baseline_fixture": {
         "score": 0.0,
         "passed_count": 0,
         "failed_count": 4,
@@ -121,7 +122,7 @@
           }
         ]
       },
-      "with_skill": {
+      "with_skill_fixture": {
         "score": 100.0,
         "passed_count": 4,
         "failed_count": 0,
@@ -165,8 +166,8 @@
         ],
         "failed": []
       },
-      "delta": 100.0,
-      "winner": "with_skill",
+      "fixture_score_delta": 100.0,
+      "fixture_winner": "with_skill",
       "failure_taxonomy": []
     },
     {
@@ -174,7 +175,7 @@
       "prompt": "不要生成 HTML，只给我一份可以复用的折射模拟课件提示词。",
       "input_files": [],
       "metadata": {},
-      "baseline": {
+      "baseline_fixture": {
         "score": 0.0,
         "passed_count": 0,
         "failed_count": 4,
@@ -275,7 +276,7 @@
           }
         ]
       },
-      "with_skill": {
+      "with_skill_fixture": {
         "score": 100.0,
         "passed_count": 4,
         "failed_count": 0,
@@ -319,8 +320,8 @@
         ],
         "failed": []
       },
-      "delta": 100.0,
-      "winner": "with_skill",
+      "fixture_score_delta": 100.0,
+      "fixture_winner": "with_skill",
       "failure_taxonomy": []
     },
     {
@@ -332,7 +333,7 @@
       "metadata": {
         "case_type": "file-backed fixture"
       },
-      "baseline": {
+      "baseline_fixture": {
         "score": 0.0,
         "passed_count": 0,
         "failed_count": 4,
@@ -435,7 +436,7 @@
           }
         ]
       },
-      "with_skill": {
+      "with_skill_fixture": {
         "score": 100.0,
         "passed_count": 4,
         "failed_count": 0,
@@ -479,8 +480,8 @@
         ],
         "failed": []
       },
-      "delta": 100.0,
-      "winner": "with_skill",
+      "fixture_score_delta": 100.0,
+      "fixture_winner": "with_skill",
       "failure_taxonomy": []
     },
     {
@@ -490,7 +491,7 @@
       "metadata": {
         "case_type": "boundary"
       },
-      "baseline": {
+      "baseline_fixture": {
         "score": 0.0,
         "passed_count": 0,
         "failed_count": 3,
@@ -567,7 +568,7 @@
           }
         ]
       },
-      "with_skill": {
+      "with_skill_fixture": {
         "score": 100.0,
         "passed_count": 3,
         "failed_count": 0,
@@ -602,8 +603,8 @@
         ],
         "failed": []
       },
-      "delta": 100.0,
-      "winner": "with_skill",
+      "fixture_score_delta": 100.0,
+      "fixture_winner": "with_skill",
       "failure_taxonomy": []
     },
     {
@@ -613,7 +614,7 @@
       "metadata": {
         "case_type": "near_neighbor"
       },
-      "baseline": {
+      "baseline_fixture": {
         "score": 0.0,
         "passed_count": 0,
         "failed_count": 3,
@@ -688,7 +689,7 @@
           }
         ]
       },
-      "with_skill": {
+      "with_skill_fixture": {
         "score": 100.0,
         "passed_count": 3,
         "failed_count": 0,
@@ -723,8 +724,8 @@
         ],
         "failed": []
       },
-      "delta": 100.0,
-      "winner": "with_skill",
+      "fixture_score_delta": 100.0,
+      "fixture_winner": "with_skill",
       "failure_taxonomy": []
     }
   ],

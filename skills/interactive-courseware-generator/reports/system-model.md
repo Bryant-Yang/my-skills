@@ -2,8 +2,8 @@
 
 Skill: `interactive-courseware-generator`
 
-- Stability score: `100/100`
-- Stability band: `system-ready`
+- Evidence maturity: `provisional`
+- Lifecycle band: `library`
 - Doctrine: Structure drives behavior: improve the boundary, feedback loops, drift watch, and leverage points before adding weight.
 
 ## System Boundary Map
@@ -28,15 +28,15 @@ Skill: `interactive-courseware-generator`
 
 ### Intent boundary loop
 
-- Signal: Intent confidence score is 100/100.
+- Signal: The intent, primary output, secondary outputs, and exclusions are explicitly recorded.
 - Response: Ask only the highest-leverage clarification before adding package weight.
-- Evidence: reports/intent-confidence.md and reports/intent-dialogue.md
+- Evidence: reports/intent-context.json and evals/trigger_cases.json
 
 ### Reference synthesis loop
 
-- Signal: Benchmark patterns are useful only after they are abstracted into borrow and avoid guidance.
+- Signal: Reference patterns are useful only after they are reduced to project-independent design rules.
 - Response: Borrow one pattern at a time and keep the rest as reviewer-visible evidence.
-- Evidence: reports/reference-synthesis.md
+- Evidence: references/design-rationale.md and reports/artifact-design-profile.md
 - Current patterns:
   - Borrow progressive disclosure: keep the entrypoint lean and move depth into references or scripts.
   - Borrow a small hypothesis-test-learn loop so the first revision is evidence-backed.
@@ -46,9 +46,9 @@ Skill: `interactive-courseware-generator`
 
 ### Output quality loop
 
-- Signal: Generated output may fail in recurring domain-specific ways.
+- Signal: Recorded fixtures and predicted risk families identify candidate failure modes, not measured model behavior.
 - Response: Apply predicted output-risk families as self-repair checks before final output.
-- Evidence: reports/output-risk-profile.md
+- Evidence: reports/output-risk-profile.md and reports/output_quality_scorecard.md
 - Current risk families:
   - Code and command safety
   - Tutorial quality
@@ -58,15 +58,15 @@ Skill: `interactive-courseware-generator`
 
 ### Reviewer feedback loop
 
-- Signal: Human review catches drift that static checks miss.
+- Signal: Human review is still needed to judge behavior that static checks miss.
 - Response: Capture lightweight feedback and turn repeated findings into gates or references.
-- Evidence: reports/review-viewer.html and feedback records
+- Evidence: reports/output_blind_review_pack.md; reviewer decisions are pending
 
 ### Lifecycle loop
 
 - Signal: As reuse grows, the skill needs stronger gates, ownership, and regression evidence.
 - Response: Promote only when the next gate improves reliability more than context cost.
-- Evidence: manifest.json, reports/iteration-directions.md, and governance checks
+- Evidence: manifest.json and reports/validation.md
 
 ## Delay And Drift Watch
 
@@ -130,25 +130,25 @@ Skill: `interactive-courseware-generator`
 
 ## Highest Leverage Moves
 
-### 2. Tune the frontmatter description
+### 1. Tune the frontmatter description
 
 - Why: The description is the highest-leverage routing surface.
 - Move: Name the recurring job, expected input, output, and strongest non-goal in compact language.
 
-### 3. Install output self-repair checks
+### 2. Install output self-repair checks
 
 - Why: The likely failure families are: Code and command safety, Tutorial quality, Markdown readability.
 - Move: Add only the checks that prevent recurring output mistakes.
 
-### 4. Borrow one pattern, not a whole product
+### 3. Borrow one pattern, not a whole product
 
 - Why: External references improve quality when reduced to structure, not copied as surface style.
 - Move: Start from: Borrow progressive disclosure: keep the entrypoint lean and move depth into references or scripts.
 
-### 5. Close the lifecycle loop
+### 4. Close the lifecycle loop
 
 - Why: Team-reused skills need visible ownership, review cadence, and regression evidence.
-- Move: Keep manifest, review viewer, and iteration directions aligned after each material change.
+- Move: Keep manifest, validation evidence, and review artifacts aligned after each material change.
 
 ## Reviewer Use
 

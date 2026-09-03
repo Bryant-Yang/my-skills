@@ -2,39 +2,50 @@
 
 日期：`2026-09-03`
 
-## 已通过
+## 已通过的可复现检查
 
-- 项目无关性扫描：Skill 源码、参考、评测和保留报告中不存在特定产品名、旧配置字段、旧动作名或机器私有路径。
-- HTML 校验器：合法夹具 `22` 项通过、`0` error、`0` warning；错误夹具被拦截出 `5` 个 error。
-- 触发评测：`5` 个应触发、`5` 个不应触发、`5` 个近邻案例全部通过；precision=`1.0`，recall=`1.0`。
-- 输出评测：`5` 个 `recorded_fixture` 案例，包含 `1` 个 `file-backed fixture`、`1` 个 near-neighbor 和 `1` 个学科边界案例；with-skill 断言通过率 `100%`，baseline `0%`，delta=`+100`，无回归；生成 `5` 组盲审材料。
-- Meta Skill 验证：validate、lint、governance 和 resource boundary 全部通过；治理分 `90/100`；初始加载估算 `749/1300` tokens。
-- Skill IR 编译：OpenAI、Claude、generic、Agent Skills compatible 和 VS Code 五个目标全部通过，无 warning 或 failure。
-- 运行时一致性：五个目标全部通过。
-- 信任检查：扫描未发现凭据或远程依赖。唯一 warning 是未发现依赖锁文件；校验器只使用 Node.js 内置模块，没有第三方依赖需要锁定。
-- 打包验证：OpenAI、Claude、generic、VS Code 四种包生成成功；压缩包共 `55` 个条目，无嵌套 Skill，归档验证通过。未提供 registry audit，因此 metadata parity 保持 warning。
+- HTML 校验器语法检查通过。
+- 两组合规夹具（数值变量、枚举变量）均以退出码 `0` 通过，结果为 `0 error / 0 warning`；外部依赖夹具只有在显式传入批准参数后才转为带警告的通过。
+- 四组负向夹具均以退出码 `1` 被拒绝，且错误代码与预期完全一致：缺少页面合同 `5` 项、非对象配置 `1` 项、非法 schema `10` 项、外部依赖 `1` 项。
+- Skill Creator quick validation 通过；临时 `.skill` 包生成成功且压缩归档完整性检查通过。
+- 所有 JSON、YAML 均可解析；仓库 `scripts/audit-public.sh` 通过，未发现凭据、机器私有路径、符号链接或本地产物。
+- 通用与 OpenAI adapter 的默认提示词均保持教学动作按需生成；manifest 已登记实际存在的 `agents` 组件。
 
-## 证据边界与剩余风险
+## 现有评测证据边界
 
-- 输出评测使用预先记录的 `recorded_fixture`，不是 provider-backed 模型运行证据。
-- 盲审包已经生成，但没有伪造 reviewer 选择；人工裁决保持 pending。
-- 尚未对模型实时生成的课件执行浏览器视觉回归和学科专家复核。
-- 元 Skill 的 trust 脚本会扫描 JavaScript 文本和 secret，但当前脚本能力清单只枚举 Python；因此 `validate-courseware.js` 的行为另由源码审查和 Node.js 实测覆盖。
-- 安装模拟器要求非空权限审批表，因本 Skill 没有网络、外部写入、subprocess 或交互权限而未伪造审批；该模拟门禁保持未通过，不影响仓库源码使用。
-- 临时打包与安装模拟产物已移出工作树，可在系统废纸篓中恢复。
+- `evals/trigger_cases.json` 是 `15` 条带标签的触发、排除和近邻样本集；本仓库没有保存 provider-backed 路由运行，因此不报告 precision 或 recall。
+- `evals/output/cases.jsonl` 是 `5` 组人工记录的 fixture。`reports/output_quality_scorecard.*` 的 `100% / 0%` 只表示这些固定文本通过必含字串断言，不是模型实际运行结果，也不是 release gate。
+- 盲审材料已生成，但没有 reviewer 选择；人工裁决保持 pending。
+- 尚未对模型实时生成的课件执行浏览器视觉回归或学科专家复核。
+- 静态校验器只验证可确定的结构、schema、处理器标记和静态可识别的外部引用；消息语义、动态拼接的网络地址、选择器可见性与状态同步仍需浏览器检查。
 
 ## 复现命令
 
 在仓库根目录运行：
 
 ```bash
-node skills/interactive-courseware-generator/scripts/validate-courseware.js \
-  skills/interactive-courseware-generator/evals/fixtures/minimal-valid-courseware.html --json
+node --check skills/interactive-courseware-generator/scripts/validate-courseware.js
 
-node skills/interactive-courseware-generator/scripts/validate-courseware.js \
-  skills/interactive-courseware-generator/evals/fixtures/invalid-courseware.html --json
+node skills/interactive-courseware-generator/evals/test-validator.js
 
 scripts/audit-public.sh
 ```
 
-第二条命令预期以退出码 `1` 拒绝错误夹具。
+回归脚本逐项断言两组正向夹具的零错误、零警告，以及四组负向夹具的退出码和完整错误代码集合。
+
+Skill Creator 检查需要先把 `<skill-creator-dir>` 和 `<skill-dir>` 替换为实际绝对路径：
+
+```bash
+uv run --with pyyaml python \
+  <skill-creator-dir>/scripts/quick_validate.py <skill-dir>
+
+package_dir="$(mktemp -d /tmp/courseware-skill-package.XXXXXX)"
+(
+  cd <skill-creator-dir>
+  uv run --with pyyaml python -m scripts.package_skill \
+    <skill-dir> "$package_dir"
+)
+unzip -t "$package_dir/interactive-courseware-generator.skill"
+```
+
+打包产物只用于归档完整性检查，不是仓库交付物。

@@ -25,7 +25,7 @@ courseware/<slug>/<slug>.html
 courseware/<slug>/<slug>.verification.md
 ```
 
-需要讲解编排或宿主控制时，额外交付 `<slug>.actions.json`。
+需要讲解编排时，额外交付 `<slug>.actions.json`；宿主控制本身只启用 HTML 内的消息桥接。
 
 ## 方法核心
 
@@ -57,4 +57,6 @@ courseware/<slug>/<slug>.verification.md
 node scripts/validate-courseware.js /absolute/path/to/courseware.html --json
 ```
 
-验证器检查 HTML 结构、`courseware-config`、变量、Canvas/SVG、控件、通用消息和远程依赖。它不执行页面，因此视觉、运行行为和学科正确性仍需单独检查。
+验证器检查 HTML 结构、`courseware-config` schema、变量与 presets、Canvas/SVG、控件、通用消息标记和静态可识别的外部依赖。它不执行页面，因此视觉、运行行为和学科正确性仍需单独检查。
+
+只有用户明确批准外部依赖时才追加 `--allow-external-dependencies`，并在验证报告中逐项列出依赖。

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>远程依赖夹具</title>
+</head>
+<body>
+  <label for="value-slider">数值</label>
+  <input id="value-slider" data-var="value" type="range" aria-label="数值">
+  <canvas id="canvas"></canvas>
+  <img src="./figure.png" alt="外部资源">
+  <script src=./external.js></script>
+  <script type="application/json" id="courseware-config">
+    {
+      "schemaVersion": 1,
+      "kind": "simulation",
+      "topic": "remote_dependency_fixture",
+      "variables": [
+        {
+          "name": "value",
+          "control": "range",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "default": 5,
+          "unit": ""
+        }
+      ],
+      "presets": [
+        { "name": "低值", "variables": { "value": 2 } }
+      ]
+    }
+  </script>
+  <script>
+    requestAnimationFrame(() => {});
+    window.addEventListener('keydown', () => {});
+    fetch('https://example.com/data.json');
+    import('./module.js');
+    new Worker('./worker.js');
+  </script>
+</body>
+</html>

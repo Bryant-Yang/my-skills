@@ -1,6 +1,6 @@
-# Output Blind A/B Review Pack
+# Recorded Fixture Blind Comparison Pack
 
-This packet hides whether each variant came from the baseline or the skill-guided output. Use the separate answer key only after review.
+This packet compares two hand-authored contract fixtures per case. It contains no model runs and is not a release gate. Variant roles are hidden only to reduce review bias; use the separate answer key after review.
 
 - Pairs: `5`
 - Seed: `yao-output-eval-blind-v1`

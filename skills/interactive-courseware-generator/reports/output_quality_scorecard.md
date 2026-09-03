@@ -1,21 +1,21 @@
-# Output Quality Scorecard
+# Recorded Fixture Contract Scorecard
 
-This v0 scorecard compares static without-skill and with-skill outputs using assertion grading.
+This scorecard checks hand-authored baseline and with-skill fixture text against required-string assertions. It does not contain model runs and is not a release gate.
 
 - Cases: `5`
-- Baseline pass rate: `0.0`
-- With-skill pass rate: `100.0`
-- Delta: `100.0`
-- Regressions: `0`
+- Baseline fixture pass rate: `0.0`
+- With-skill fixture pass rate: `100.0`
+- Fixture delta: `100.0`
+- Fixture regressions: `0`
 - Blind A/B pairs: `5`
-- Gate pass: `True`
+- Release gate: `False`
 
 Blind review artifacts are generated separately so reviewers can inspect A/B outputs without seeing the answer key.
 Run output review adjudication after reviewer decisions are recorded; pending cases should stay pending rather than being counted as human agreement.
 
 ## Case Results
 
-| Case | Baseline | With Skill | Delta | Winner | Failed With-Skill Assertions |
+| Case | Baseline Fixture | With-Skill Fixture | Delta | Fixture Winner | Failed Fixture Assertions |
 | --- | ---: | ---: | ---: | --- | --- |
 | build-interactive-page | 0.0 | 100.0 | 100.0 | with_skill | None |
 | prompt-only-mode | 0.0 | 100.0 | 100.0 | with_skill | None |
@@ -27,8 +27,8 @@ Run output review adjudication after reviewer decisions are recorded; pending ca
 
 - No with-skill assertion failures.
 
-## Next Fixes
+## Next Evidence
 
-- Add holdout cases before using this as a release gate.
+- Run provider-backed with-skill and baseline cases, capture timing and grading, and add holdout cases before considering a release gate.
 - Promote repeated failed assertions into the output-risk profile.
 - Keep assertions tied to material deliverables, not phrasing trivia.

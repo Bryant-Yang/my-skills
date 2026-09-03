@@ -6,15 +6,16 @@ const path = require('node:path');
 const args = process.argv.slice(2);
 const jsonMode = args.includes('--json');
 const requireHostBridge = args.includes('--require-host-bridge');
+const allowExternalDependencies = args.includes('--allow-external-dependencies');
 const fileArg = args.find((arg) => !arg.startsWith('--'));
 
 if (args.includes('--help')) {
-  process.stdout.write('Usage: node scripts/validate-courseware.js <courseware.html> [--json] [--require-host-bridge]\n');
+  process.stdout.write('Usage: node scripts/validate-courseware.js <courseware.html> [--json] [--require-host-bridge] [--allow-external-dependencies]\n');
   process.exit(0);
 }
 
 if (!fileArg) {
-  const usage = 'Usage: node scripts/validate-courseware.js <courseware.html> [--json] [--require-host-bridge]';
+  const usage = 'Usage: node scripts/validate-courseware.js <courseware.html> [--json] [--require-host-bridge] [--allow-external-dependencies]';
   if (jsonMode) {
     process.stdout.write(`${JSON.stringify({ ok: false, error: usage }, null, 2)}\n`);
   } else {
@@ -64,6 +65,20 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isFiniteNumber(value) {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function alignsToStep(value, min, step) {
+  if (![value, min, step].every(isFiniteNumber) || step <= 0) return false;
+  const offset = (value - min) / step;
+  return Math.abs(offset - Math.round(offset)) < 1e-9;
+}
+
 if (html.trim().length === 0) {
   issue(errors, 'empty-file', 'HTML file is empty');
 }
@@ -98,25 +113,33 @@ for (const match of html.matchAll(scriptPattern)) {
   scriptBlocks.push({ attrs: match[1], content: match[2] });
 }
 
-const configBlock = scriptBlocks.find(
+const configBlocks = scriptBlocks.filter(
   ({ attrs }) =>
     /\bid\s*=\s*["']courseware-config["']/i.test(attrs) &&
     /\btype\s*=\s*["']application\/json["']/i.test(attrs),
 );
+const configBlock = configBlocks[0];
 
 let config;
-if (!configBlock) {
-  issue(errors, 'courseware-config-missing', 'Missing application/json script with id="courseware-config"');
-} else {
+if (configBlocks.length !== 1) {
+  issue(
+    errors,
+    'courseware-config-count',
+    `Expected exactly one application/json script with id="courseware-config", found ${configBlocks.length}`,
+  );
+}
+if (configBlock) {
   try {
     config = JSON.parse(configBlock.content.trim());
     pass('courseware-config-json', 'courseware-config is valid JSON');
   } catch (error) {
     issue(errors, 'courseware-config-json', `courseware-config JSON parse failed: ${error.message}`);
   }
+} else {
+  config = undefined;
 }
 
-if (config && (typeof config !== 'object' || Array.isArray(config))) {
+if (config !== undefined && !isPlainObject(config)) {
   issue(errors, 'courseware-config-shape', 'courseware-config must be a JSON object');
   config = undefined;
 }
@@ -132,6 +155,16 @@ if (config) {
     pass('courseware-kind', 'courseware-config kind is simulation');
   } else {
     issue(errors, 'courseware-kind', `courseware-config kind must be "simulation", found ${JSON.stringify(config.kind)}`);
+  }
+
+  if (typeof config.topic === 'string' && /^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$/.test(config.topic)) {
+    pass('courseware-topic', `courseware-config topic is a stable slug: ${config.topic}`);
+  } else {
+    issue(errors, 'courseware-topic', 'courseware-config topic must be a non-empty lowercase English slug');
+  }
+
+  if ('hostBridge' in config && typeof config.hostBridge !== 'boolean') {
+    issue(errors, 'host-bridge-type', 'courseware-config hostBridge must be boolean when present');
   }
 
   if (!Array.isArray(config.variables) || config.variables.length === 0) {
@@ -154,6 +187,10 @@ if (config) {
       }
       seen.add(name);
 
+      if (typeof variable.control !== 'string' || variable.control.trim() === '') {
+        issue(errors, 'variable-control', `Variable "${name}" is missing a non-empty control`);
+      }
+
       const escaped = escapeRegExp(name);
       const idHook = new RegExp(`\\bid\\s*=\\s*["']${escaped}-(?:slider|control|input)["']`, 'i');
       const dataHook = new RegExp(`\\bdata-var\\s*=\\s*["']${escaped}["']`, 'i');
@@ -165,13 +202,46 @@ if (config) {
         );
       }
 
-      if (typeof variable.default === 'number') {
-        if (typeof variable.min !== 'number' || typeof variable.max !== 'number') {
-          issue(warnings, 'variable-range', `Numeric variable "${name}" should declare min and max`);
-        } else if (variable.min > variable.max) {
+      if (Array.isArray(variable.options)) {
+        if (variable.options.length === 0) {
+          issue(errors, 'variable-options', `Enum variable "${name}" must declare at least one option`);
+        } else if (new Set(variable.options.map((value) => JSON.stringify(value))).size !== variable.options.length) {
+          issue(errors, 'variable-options-duplicate', `Enum variable "${name}" contains duplicate options`);
+        }
+        if (!variable.options.some((value) => Object.is(value, variable.default))) {
+          issue(errors, 'variable-default-option', `Enum variable "${name}" default is not present in options`);
+        }
+      } else {
+        const numericFields = ['min', 'max', 'step', 'default'];
+        for (const field of numericFields) {
+          if (!isFiniteNumber(variable[field])) {
+            issue(errors, 'variable-numeric-field', `Numeric variable "${name}" must declare finite ${field}`);
+          }
+        }
+        if (typeof variable.unit !== 'string') {
+          issue(errors, 'variable-unit', `Numeric variable "${name}" must declare unit as a string`);
+        }
+        if (isFiniteNumber(variable.step) && variable.step <= 0) {
+          issue(errors, 'variable-step', `Numeric variable "${name}" step must be greater than zero`);
+        }
+        if (isFiniteNumber(variable.min) && isFiniteNumber(variable.max) && variable.min > variable.max) {
           issue(errors, 'variable-range-order', `Variable "${name}" has min greater than max`);
-        } else if (variable.default < variable.min || variable.default > variable.max) {
+        } else if (
+          isFiniteNumber(variable.default) &&
+          isFiniteNumber(variable.min) &&
+          isFiniteNumber(variable.max) &&
+          (variable.default < variable.min || variable.default > variable.max)
+        ) {
           issue(errors, 'variable-default-range', `Variable "${name}" default is outside min/max`);
+        }
+        if (
+          isFiniteNumber(variable.default) &&
+          isFiniteNumber(variable.min) &&
+          isFiniteNumber(variable.step) &&
+          variable.step > 0 &&
+          !alignsToStep(variable.default, variable.min, variable.step)
+        ) {
+          issue(errors, 'variable-default-step', `Variable "${name}" default does not align with step from min`);
         }
       }
     }
@@ -180,22 +250,46 @@ if (config) {
     }
   }
 
-  if (Array.isArray(config.presets) && config.presets.length > 0) {
+  if (config.presets === undefined || (Array.isArray(config.presets) && config.presets.length === 0)) {
+    issue(warnings, 'presets', 'No presets declared in courseware-config');
+  } else if (!Array.isArray(config.presets)) {
+    issue(errors, 'presets-shape', 'courseware-config presets must be an array when present');
+  } else {
     pass('presets', `${config.presets.length} preset(s) declared`);
     const variableNames = new Set((config.variables || []).map((item) => item?.name).filter(Boolean));
     for (const [index, preset] of config.presets.entries()) {
-      if (!preset || typeof preset !== 'object' || !preset.variables || typeof preset.variables !== 'object') {
-        issue(warnings, 'preset-shape', `presets[${index}] should contain a variables object`);
+      if (!isPlainObject(preset) || !isPlainObject(preset.variables)) {
+        issue(errors, 'preset-shape', `presets[${index}] must contain a variables object`);
         continue;
+      }
+      if (typeof preset.name !== 'string' || preset.name.trim() === '') {
+        issue(errors, 'preset-name', `presets[${index}] must declare a non-empty name`);
+      }
+      if (Object.keys(preset.variables).length === 0) {
+        issue(errors, 'preset-variables-empty', `presets[${index}].variables must not be empty`);
       }
       for (const name of Object.keys(preset.variables)) {
         if (!variableNames.has(name)) {
           issue(errors, 'preset-variable', `Preset ${index} references undeclared variable "${name}"`);
+          continue;
+        }
+        const variable = config.variables.find((item) => item?.name === name);
+        const value = preset.variables[name];
+        if (Array.isArray(variable.options) && !variable.options.some((option) => Object.is(option, value))) {
+          issue(errors, 'preset-value-option', `Preset ${index} uses an invalid option for variable "${name}"`);
+        } else if (
+          !Array.isArray(variable.options) &&
+          (!isFiniteNumber(value) || value < variable.min || value > variable.max)
+        ) {
+          issue(errors, 'preset-value-range', `Preset ${index} value for variable "${name}" is outside its numeric range`);
+        } else if (
+          !Array.isArray(variable.options) &&
+          !alignsToStep(value, variable.min, variable.step)
+        ) {
+          issue(errors, 'preset-value-step', `Preset ${index} value for variable "${name}" does not align with step from min`);
         }
       }
     }
-  } else {
-    issue(warnings, 'presets', 'No presets declared in courseware-config');
   }
 }
 
@@ -223,12 +317,65 @@ if (hostBridgeRequired) {
   pass('host-bridge-optional', 'Host bridge is not declared or required');
 }
 
-const remoteAssetPattern = /<(?:script|link|iframe)\b[^>]*(?:src|href)\s*=\s*["']https?:\/\//gi;
-const remoteAssets = count(remoteAssetPattern);
-if (remoteAssets > 0) {
-  issue(errors, 'remote-assets', `Found ${remoteAssets} remote script, stylesheet, or iframe reference(s)`);
+function isEmbeddedReference(value) {
+  const normalized = value.trim().toLowerCase();
+  return normalized === '' || normalized.startsWith('data:') || normalized.startsWith('blob:') || normalized.startsWith('#') || normalized === 'about:blank';
+}
+
+const externalReferences = [];
+const referencedElementPattern = /<(?:script|link|iframe|img|audio|video|source|track|embed|object)\b([^>]*)>/gi;
+for (const elementMatch of html.matchAll(referencedElementPattern)) {
+  const attributePattern = /\b(srcset|src|href|poster|data)\s*=\s*(?:(["'])(.*?)\2|([^\s"'=<>`]+))/gi;
+  for (const attributeMatch of elementMatch[1].matchAll(attributePattern)) {
+    const attributeName = attributeMatch[1];
+    const attributeValue = attributeMatch[3] ?? attributeMatch[4] ?? '';
+    const values = attributeName.toLowerCase() === 'srcset' && !attributeValue.trim().toLowerCase().startsWith('data:')
+      ? attributeValue.split(',').map((item) => item.trim().split(/\s+/)[0])
+      : [attributeValue];
+    if (values.some((value) => !isEmbeddedReference(value))) externalReferences.push('element');
+  }
+}
+
+const cssUrlPattern = /url\(\s*["']?([^"')]+)["']?\s*\)/gi;
+for (const match of html.matchAll(cssUrlPattern)) {
+  if (!isEmbeddedReference(match[1])) externalReferences.push('css-url');
+}
+for (const match of html.matchAll(/@import\s+(?!url\()["']([^"']+)["']/gi)) {
+  if (!isEmbeddedReference(match[1])) externalReferences.push('css-import');
+}
+
+const requestPatterns = [
+  /\bfetch\s*\(\s*["'`]([^"'`]+)["'`]/gi,
+  /\bimport\s*\(\s*["'`]([^"'`]+)["'`]/gi,
+  /\bimport\s+(?:[^"'`]*?\s+from\s*)?["'`]([^"'`]+)["'`]/gi,
+  /\bnew\s+(?:Worker|SharedWorker)\s*\(\s*["'`]([^"'`]+)["'`]/gi,
+  /\bimportScripts\s*\(\s*["'`]([^"'`]+)["'`]/gi,
+  /\bnavigator\.serviceWorker\.register\s*\(\s*["'`]([^"'`]+)["'`]/gi,
+  /\bnew\s+URL\s*\(\s*["'`]([^"'`]+)["'`]/gi,
+  /\bnew\s+(?:WebSocket|EventSource)\s*\(\s*["'`]([^"'`]+)["'`]/gi,
+  /\.open\s*\(\s*["'`](?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)["'`]\s*,\s*["'`]([^"'`]+)["'`]/gi,
+  /\bnavigator\.sendBeacon\s*\(\s*["'`]([^"'`]+)["'`]/gi,
+];
+for (const pattern of requestPatterns) {
+  for (const match of html.matchAll(pattern)) {
+    if (!isEmbeddedReference(match[1])) externalReferences.push('network-request');
+  }
+}
+
+if (externalReferences.length > 0 && !allowExternalDependencies) {
+  issue(errors, 'external-dependencies', `Found ${externalReferences.length} external asset or network request reference(s)`);
+} else if (externalReferences.length > 0) {
+  issue(warnings, 'external-dependencies-approved', `Allowed ${externalReferences.length} external reference(s) by explicit flag; list them in the verification report`);
 } else {
-  pass('remote-assets', 'No remote script, stylesheet, or iframe references found');
+  pass('external-dependencies', 'No static external asset or network request references found');
+}
+
+const fixedCanvasSize = [...html.matchAll(/<canvas\b[^>]*>/gi)].some(
+  ([tag]) => /\bwidth\s*=\s*["']?\d+/i.test(tag) && /\bheight\s*=\s*["']?\d+/i.test(tag),
+);
+const responsiveCanvasSignal = /(?:ResizeObserver|devicePixelRatio|getBoundingClientRect|clientWidth|clientHeight|addEventListener\s*\(\s*["']resize["'])/;
+if (fixedCanvasSize && !responsiveCanvasSignal.test(html)) {
+  issue(warnings, 'fixed-canvas-size', 'Canvas has fixed width and height without a detected responsive resize strategy');
 }
 
 if (/requestAnimationFrame\s*\(/.test(html)) {

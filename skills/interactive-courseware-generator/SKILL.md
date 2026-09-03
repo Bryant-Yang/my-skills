@@ -9,16 +9,13 @@ description: "把单个知识点设计、生成或修复为一页自包含、可
 
 把一个教学概念变成一页可运行的交互式网页。核心合同是：让学生通过调节变量，观察可见现象，比较典型状态，从而理解明确的因果关系。
 
-## 必读资源
+## 按任务读取资源
 
-开始生成前完整阅读：
-
-- [生成框架](references/generation-framework.md)：教学规划、HTML 生成和教学动作三层提示词。
-- [运行协议](references/runtime-contract.md)：项目无关的 `courseware-config`、DOM 命名和可选宿主消息合同。
-- [质量门禁](references/quality-gates.md)：确定性检查、浏览器检查和学科风险边界。
-
-PWM 或相近模拟可再读 [PWM 示例](references/pwm-example.md)，只借鉴结构，不复制页面设计。
-需要迁移到新宿主或判断哪些约束必须保持中性时，再读 [设计依据](references/design-rationale.md)。
+- 生成新课件或提示词时读 [生成框架](references/generation-framework.md)。
+- 直接构建 HTML，或修改配置、教学动作、宿主桥接时读 [运行协议](references/runtime-contract.md)。
+- 生成、修改或验证 HTML 时读 [质量门禁](references/quality-gates.md)。
+- PWM 或相近模拟再读 [PWM 示例](references/pwm-example.md)，只借鉴结构，不复制页面设计。
+- 迁移到新宿主或判断哪些约束必须保持中性时读 [设计依据](references/design-rationale.md)。
 
 ## Workflow
 
@@ -33,11 +30,13 @@ PWM 或相近模拟可再读 [PWM 示例](references/pwm-example.md)，只借鉴
    node <skill-dir>/scripts/validate-courseware.js <courseware.html> --json
    ```
 
+   用户明确批准外部依赖时追加 `--allow-external-dependencies`，并在验证报告中逐项列出；相对文件引用也属于外部依赖。
+
 7. 能使用浏览器时，继续检查桌面与移动布局、启动/暂停/重置、每个变量、所有预设、教学动作和控制台错误。修复失败后重新验证。
 
 ## Output Contract
 
-- **直接构建**：在用户指定目录输出 `<slug>.html` 和 `<slug>.verification.md`；需要讲解编排或宿主控制时再输出 `<slug>.actions.json`。未指定目录时使用当前工作区的 `courseware/<slug>/`。
+- **直接构建**：在用户指定目录输出 `<slug>.html` 和 `<slug>.verification.md`；用户需要讲解编排时再输出 `<slug>.actions.json`。宿主控制只启用 HTML 内的消息桥接，不自动要求动作文件。未指定目录时使用当前工作区的 `courseware/<slug>/`。
 - **只要提示词**：输出 `<slug>.prompt.md`，包含教学规格、HTML system/user prompt 和教学动作 prompt，不伪造已生成或已验证的 HTML。
 - **修改现有课件**：保留用户已有内容，只修改目标行为，并重新运行相关门禁。
 

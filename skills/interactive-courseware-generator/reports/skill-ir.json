@@ -43,7 +43,7 @@
       "能使用浏览器时，继续检查桌面与移动布局、启动/暂停/重置、每个变量、所有预设、教学动作和控制台错误。修复失败后重新验证。"
     ],
     "decision_points": [
-      "**直接构建**：在用户指定目录输出 `<slug>.html` 和 `<slug>.verification.md`；需要讲解编排或宿主控制时再输出 `<slug>.actions.json`。未指定目录时使用当前工作区的 `courseware/<slug>/`。",
+      "**直接构建**：在用户指定目录输出 `<slug>.html` 和 `<slug>.verification.md`；用户需要讲解编排时再输出 `<slug>.actions.json`。宿主控制只启用 HTML 内的消息桥接，不自动要求动作文件。未指定目录时使用当前工作区的 `courseware/<slug>/`。",
       "**只要提示词**：输出 `<slug>.prompt.md`，包含教学规格、HTML system/user prompt 和教学动作 prompt，不伪造已生成或已验证的 HTML。",
       "**修改现有课件**：保留用户已有内容，只修改目标行为，并重新运行相关门禁。"
     ],

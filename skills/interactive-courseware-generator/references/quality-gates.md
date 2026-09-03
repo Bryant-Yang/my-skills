@@ -10,6 +10,8 @@
 node scripts/validate-courseware.js <courseware.html> --json
 ```
 
+默认拒绝绝对或相对的外部资源与静态可识别网络请求。只有用户明确批准时才追加 `--allow-external-dependencies`，并在验证报告中逐项列出。
+
 错误必须清零：
 
 - 文件可读取且非空；
@@ -17,10 +19,11 @@ node scripts/validate-courseware.js <courseware.html> --json
 - 存在 viewport；
 - 存在 Canvas 或 SVG；
 - 存在交互控件；
-- `courseware-config` 存在且 JSON 可解析；
-- `schemaVersion=1`、`kind=simulation`，变量数组非空且变量名唯一；
-- 需要宿主桥接时，存在 `message` 监听和四种 `COURSEWARE_*` 消息协议；
-- 不存在未经允许的远程脚本、样式或 iframe。
+- 恰好存在一份 `courseware-config`，JSON 可解析且根值为对象；
+- `schemaVersion=1`、`kind=simulation`、topic 合法，变量数组非空且变量名唯一；
+- 数值变量和枚举变量的必需字段、默认值、范围、options 与 presets 值均合法；
+- 需要宿主桥接时，存在 `message` 监听和四种 `COURSEWARE_*` 处理器标记；
+- 不存在未获批准的外部脚本、样式、媒体、iframe 或静态可识别网络请求。
 
 警告需要人工判断：
 
@@ -29,7 +32,7 @@ node scripts/validate-courseware.js <courseware.html> --json
 - 存在可能的固定 Canvas 尺寸；
 - 内联脚本无法通过保守语法探测。
 
-此脚本不执行 HTML，因此通过不代表运行正确。
+此脚本不执行 HTML，因此处理器标记通过不代表消息语义正确；布局、状态同步、选择器可见性和学科模型仍需浏览器或人工检查。
 
 ## B. 浏览器行为检查
 

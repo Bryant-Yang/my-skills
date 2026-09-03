@@ -1,10 +1,12 @@
 {
   "schema_version": "1.0",
   "seed": "yao-output-eval-blind-v1",
+  "evidence_mode": "recorded_fixture_contract_comparison",
   "summary": {
     "pair_count": 5,
     "answer_key_separate": true,
-    "with_skill_hidden_count": 5
+    "candidate_fixture_hidden_count": 5,
+    "release_gate": false
   },
   "pairs": [
     {
@@ -12,7 +14,7 @@
       "prompt": "生成一页牛顿第二定律交互课件。",
       "input_files": [],
       "metadata": {},
-      "review_instruction": "Pick A or B based only on the rubric. Do not infer which output came from the skill.",
+      "review_instruction": "Pick A or B based only on the rubric. Both variants are hand-authored contract fixtures, not model outputs.",
       "rubric": [
         {
           "id": "interaction-map",
@@ -49,7 +51,7 @@
       "prompt": "不要生成 HTML，只给我一份可以复用的折射模拟课件提示词。",
       "input_files": [],
       "metadata": {},
-      "review_instruction": "Pick A or B based only on the rubric. Do not infer which output came from the skill.",
+      "review_instruction": "Pick A or B based only on the rubric. Both variants are hand-authored contract fixtures, not model outputs.",
       "rubric": [
         {
           "id": "prompt-artifact",
@@ -90,7 +92,7 @@
       "metadata": {
         "case_type": "file-backed fixture"
       },
-      "review_instruction": "Pick A or B based only on the rubric. Do not infer which output came from the skill.",
+      "review_instruction": "Pick A or B based only on the rubric. Both variants are hand-authored contract fixtures, not model outputs.",
       "rubric": [
         {
           "id": "scope-control",
@@ -129,7 +131,7 @@
       "metadata": {
         "case_type": "boundary"
       },
-      "review_instruction": "Pick A or B based only on the rubric. Do not infer which output came from the skill.",
+      "review_instruction": "Pick A or B based only on the rubric. Both variants are hand-authored contract fixtures, not model outputs.",
       "rubric": [
         {
           "id": "model-required",
@@ -163,7 +165,7 @@
       "metadata": {
         "case_type": "near_neighbor"
       },
-      "review_instruction": "Pick A or B based only on the rubric. Do not infer which output came from the skill.",
+      "review_instruction": "Pick A or B based only on the rubric. Both variants are hand-authored contract fixtures, not model outputs.",
       "rubric": [
         {
           "id": "declines-route",

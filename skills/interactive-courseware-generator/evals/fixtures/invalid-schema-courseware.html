@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>非法 Schema 夹具</title>
+</head>
+<body>
+  <label for="value-slider">数值</label>
+  <input id="value-slider" data-var="value" type="range" aria-label="数值">
+  <label for="mode-control">模式</label>
+  <select id="mode-control" data-var="mode" aria-label="模式"><option>A</option></select>
+  <canvas id="canvas"></canvas>
+  <script type="application/json" id="courseware-config">
+    {
+      "schemaVersion": 1,
+      "kind": "simulation",
+      "topic": "",
+      "hostBridge": "yes",
+      "variables": [
+        {
+          "name": "value",
+          "control": "",
+          "min": 10,
+          "max": 20,
+          "step": 0,
+          "default": 30
+        },
+        {
+          "name": "mode",
+          "control": "select",
+          "default": "c",
+          "options": ["a", "a"]
+        }
+      ],
+      "presets": [
+        { "name": "非法值", "variables": { "value": 100, "mode": "z" } }
+      ]
+    }
+  </script>
+  <script>
+    requestAnimationFrame(() => {});
+    window.addEventListener('keydown', () => {});
+  </script>
+</body>
+</html>

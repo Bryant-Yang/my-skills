@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>变量关系模拟</title>
+  <style>
+    canvas { display: block; width: 100%; height: 360px; }
+    .highlight { outline: 3px solid #d97706; outline-offset: 3px; }
+    .annotation { display: inline-block; margin-left: 0.5rem; padding: 0.25rem; background: #fef3c7; }
+  </style>
 </head>
 <body>
   <main>
@@ -11,8 +16,12 @@
     <input id="main_variable-slider" data-var="main_variable" type="range" min="0" max="100" value="50" aria-label="主变量">
     <span id="main_variable-display">50%</span>
     <button id="start-btn" type="button">启动</button>
+    <button id="pause-btn" type="button">暂停</button>
     <button id="reset-btn" type="button">重置</button>
-    <canvas id="canvas" width="640" height="360"></canvas>
+    <button id="low-preset-btn" type="button">低值预设</button>
+    <output id="status-display">已暂停</output>
+    <canvas id="canvas"></canvas>
+    <p id="formula-panel" hidden>可见结果随主变量单调增加。</p>
   </main>
   <script type="application/json" id="courseware-config">
     {
@@ -25,6 +34,7 @@
         {
           "name": "main_variable",
           "label": "主变量",
+          "control": "range",
           "min": 0,
           "max": 100,
           "step": 1,
@@ -43,26 +53,120 @@
   <script>
     let animationId = 0;
     function frame() {
+      draw();
       animationId = requestAnimationFrame(frame);
     }
-    function updateState(state) {
+
+    function start() {
+      if (animationId) return;
+      document.getElementById('status-display').textContent = '运行中';
+      frame();
+    }
+
+    function pause() {
+      if (animationId) cancelAnimationFrame(animationId);
+      animationId = 0;
+      document.getElementById('status-display').textContent = '已暂停';
+    }
+
+    function draw() {
+      const input = document.getElementById('main_variable-slider');
+      const canvas = document.getElementById('canvas');
+      const context = canvas.getContext('2d');
+      const value = Number(input.value);
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = '#2563eb';
+      context.fillRect(0, 0, width * value / 100, height);
+    }
+
+    function resizeCanvas() {
+      const canvas = document.getElementById('canvas');
+      const ratio = window.devicePixelRatio || 1;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+      canvas.getContext('2d').setTransform(ratio, 0, 0, ratio, 0, 0);
+      draw();
+    }
+
+    function setState(state) {
       const input = document.getElementById('main_variable-slider');
       if (typeof state.main_variable === 'number') {
         input.value = String(Math.max(0, Math.min(100, state.main_variable)));
+        document.getElementById('main_variable-display').textContent = `${input.value}%`;
+        draw();
       }
     }
+
+    function safeQuery(target) {
+      if (typeof target !== 'string') return null;
+      try {
+        return document.querySelector(target);
+      } catch {
+        return null;
+      }
+    }
+
+    function highlight(target) {
+      const element = safeQuery(target);
+      if (!element) return;
+      element.classList.add('highlight');
+      setTimeout(() => element.classList.remove('highlight'), 1500);
+    }
+
+    function annotate(target, content) {
+      const element = safeQuery(target);
+      if (!element) return;
+      const note = document.createElement('span');
+      note.className = 'annotation';
+      note.textContent = String(content || '');
+      element.insertAdjacentElement('afterend', note);
+      setTimeout(() => note.remove(), 2000);
+    }
+
+    function reveal(target) {
+      const element = safeQuery(target);
+      if (element?.hasAttribute('hidden')) element.removeAttribute('hidden');
+    }
+
+    function reset() {
+      pause();
+      setState({ main_variable: 50 });
+      document.getElementById('formula-panel').hidden = true;
+      document.querySelectorAll('.highlight').forEach((element) => element.classList.remove('highlight'));
+      document.querySelectorAll('.annotation').forEach((element) => element.remove());
+    }
+
+    document.getElementById('main_variable-slider').addEventListener('input', (event) => {
+      setState({ main_variable: Number(event.target.value) });
+    });
+    document.getElementById('start-btn').addEventListener('click', start);
+    document.getElementById('pause-btn').addEventListener('click', pause);
+    document.getElementById('reset-btn').addEventListener('click', reset);
+    document.getElementById('low-preset-btn').addEventListener('click', () => setState({ main_variable: 20 }));
     window.addEventListener('keydown', (event) => {
-      if (event.key === ' ') frame();
-      if (event.key.toLowerCase() === 'r') updateState({ main_variable: 50 });
+      if (event.key === ' ') {
+        event.preventDefault();
+        if (animationId) pause(); else start();
+      }
+      if (event.key.toLowerCase() === 'r') {
+        reset();
+      }
     });
     window.addEventListener('message', (event) => {
-      if (!event.data || typeof event.data !== 'object') return;
+      if (!event.data || typeof event.data !== 'object' || Array.isArray(event.data)) return;
       const { type, state, target, content } = event.data;
-      if (type === 'COURSEWARE_SET_STATE') updateState(state || {});
-      if (type === 'COURSEWARE_HIGHLIGHT' && target) document.querySelector(target)?.classList.add('highlight');
-      if (type === 'COURSEWARE_ANNOTATE' && target && content) document.querySelector(target)?.setAttribute('data-note', String(content));
-      if (type === 'COURSEWARE_REVEAL' && target) document.querySelector(target)?.removeAttribute('hidden');
+      if (type === 'COURSEWARE_SET_STATE') setState(state || {});
+      if (type === 'COURSEWARE_HIGHLIGHT') highlight(target);
+      if (type === 'COURSEWARE_ANNOTATE') annotate(target, content);
+      if (type === 'COURSEWARE_REVEAL') reveal(target);
     });
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    setState({ main_variable: 50 });
   </script>
 </body>
 </html>

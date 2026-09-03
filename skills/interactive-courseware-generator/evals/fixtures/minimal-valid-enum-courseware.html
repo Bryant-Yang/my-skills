@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>枚举变量夹具</title>
+</head>
+<body>
+  <label for="mode-control">模式</label>
+  <select id="mode-control" data-var="mode" aria-label="模式">
+    <option value="slow">慢</option>
+    <option value="fast">快</option>
+  </select>
+  <canvas id="canvas"></canvas>
+  <script type="application/json" id="courseware-config">
+    {
+      "schemaVersion": 1,
+      "kind": "simulation",
+      "topic": "enum_fixture",
+      "variables": [
+        {
+          "name": "mode",
+          "control": "select",
+          "default": "slow",
+          "options": ["slow", "fast"]
+        }
+      ],
+      "presets": [
+        { "name": "快速", "variables": { "mode": "fast" } }
+      ]
+    }
+  </script>
+  <script>
+    requestAnimationFrame(() => {});
+    window.addEventListener('keydown', () => {});
+  </script>
+</body>
+</html>
