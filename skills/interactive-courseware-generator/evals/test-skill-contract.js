@@ -80,7 +80,7 @@ assert(gates.includes('紧凑课件组检查'), 'quality gates should include su
 assert(gates.includes('普通 `<a>` 页间导航不按外部资源处理'), 'quality gates should allow local page navigation');
 assert(gates.includes('不要求满足模拟器 validator'), 'quality gates should exempt index pages from simulation validation');
 
-assert(manifest.version === '1.1.0', 'manifest should declare the evolved skill version');
+assert(manifest.version === '1.2.0', 'manifest should declare the evolved skill version');
 assert(manifest.factory_components.includes('evals'), 'manifest should include the contract eval component');
 assert(
   semanticConfig.fallback_positive_concepts.includes('course_suite'),

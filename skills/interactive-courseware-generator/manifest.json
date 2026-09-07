@@ -1,8 +1,8 @@
 {
   "name": "interactive-courseware-generator",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "owner": "Bryant Yang",
-  "updated_at": "2026-09-03",
+  "updated_at": "2026-09-07",
   "status": "active",
   "maturity_tier": "library",
   "lifecycle_stage": "library",
@@ -24,7 +24,7 @@
     "evals",
     "reports"
   ],
-  "output_contract": "单页或同目录紧凑课件组的自包含交互式 HTML 与验证报告；多页时含目录与 README，按需附加教学动作 JSON，或在 prompt-only 模式交付完整提示词包",
+  "output_contract": "单页或同目录紧凑课件组的自包含交互式 HTML 与验证报告；多页时含目录与 README，按需附加教学动作 JSON，或在 prompt-only 模式交付完整提示词包；基于认知路径提供理解检查，精确 3D 时附 bpy 源脚本、参数、blend、导出资源与几何验证",
   "rollback_boundary": "将该 Skill 目录恢复到上一个已验证的 Git 版本，并让共享安装链接继续指向该目录",
   "source_attribution": "为本仓库原创的项目无关交互式课件方法与协议",
   "source_license": "Original work; repository license applies"

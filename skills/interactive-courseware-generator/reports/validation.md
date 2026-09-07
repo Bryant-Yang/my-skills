@@ -1,4 +1,36 @@
-# 验证记录
+# 2026-09-07 v1.2.0 增强验证
+
+本次修改认知教学路径、精确 3D 制作合同、提示词、验收规则和相关元数据。没有生成完整新课件，也没有改动旧 fixture 的评分来代表新增能力。
+
+## 已执行
+
+- `test-skill-contract.js`、`test-validator.js`、Skill Creator `quick_validate.py`：通过。
+- JSON/YAML 解析、Markdown 本地引用、临时归档完整性、`audit-public.sh` 和 `git diff --check`：通过。
+- 本机 Blender `5.2.1 LTS`，通过后台 Python 实际执行参数建模、尺寸断言、保存 `.blend`、导出 GLB、清空场景、重新导入及尺寸/对象名复核。
+- 测试尺寸：120 × 40 × 20 mm；公差：`1e-6 m`；导出后最大尺寸误差：`2.682209010451686e-9 m`；对象名保留。此基础案例是长方体，不验证任意装配、运动约束或物理机制。
+- Blender 命令参数经本机 `--help` 核对。IES/WWC 学习指导页面已读取，教学设计参考链接保存在 `references/cognitive-design.md`。Blender 在线文档本次返回 HTTP 403，相关执行行为以本机实测为据，不声称在线文档核对通过。
+
+## 新增能力的证据边界
+
+- `evals/teaching-spatial-cases.md` 提供七个行为评审场景与失败判据，尚未执行独立模型端到端生成，不能称为七个通过的行为回归。
+- 本次未进行完整 3D 课件的浏览器、移动端、动画或视觉检查；未做实际学习者实验，不能宣称学习效果已有实测提升。
+- 已将对应检查加入课件交付门禁；静态结构检查不能证明几何或教学正确。
+
+## Blender 基础链路复现
+
+在仓库根目录运行，下列输出目录必须尚不存在（防止覆盖现有文件）：
+
+```bash
+blender --background --factory-startup --python-exit-code 1 \
+  --python skills/interactive-courseware-generator/evals/blender-roundtrip-smoke.py \
+  -- --output-dir /tmp/courseware-bpy-roundtrip-new
+```
+
+成功时生成 `model.blend`、`model.glb` 与 `result.json`。脚本会改动其运行进程中的场景，应按上述命令在独立后台进程运行，不在用户打开的工程中执行。
+
+---
+
+# 2026-09-03 历史验证记录
 
 日期：`2026-09-03`
 

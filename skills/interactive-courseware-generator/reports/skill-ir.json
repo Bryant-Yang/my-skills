@@ -36,8 +36,10 @@
     "steps": [
       "先按学习问题、因果模型和先备关系判断生成单页还是默认 2–4 页的紧凑课件组，不按术语数量拆页。",
       "为整个主题写一句真实任务，并用同一个具体案例贯穿各页；每页只回答一个学生问题。",
+      "依据先备经验和误解设计具体机制示范、单条件对比、抽象映射与独立预测/迁移，提供错因反馈。",
       "建立“知识点 → 可调变量 → 控件 → 可观察现象 → 对比状态 → 因果结论”映射。每个变量必须有控件和可见结果。",
       "先写课件规格，再按生成框架实现。具体布局、视觉和动画可以创作，但不得改变教学因果关系。",
+      "精确 3D 必须使用 Blender bpy 建模，保留参数、blend、导出资源，验证尺寸/公差、运动关系及页面同步。",
       "默认首屏按问题、主要操作、核心现象、结论四拍组织；命令、推导、完整规则和协议轨迹按需展开。",
       "涉及工具或协议时，提供与当前交互同步的最小真实命令、代码或配置。",
       "在每个概念页和综合实验页内嵌合法 `courseware-config` 并使用稳定 DOM ID。交互页必须能独立运行；目录页只承担学习路径和导航。需要宿主控制时，再实现运行协议中的四类中性消息。",
@@ -49,7 +51,8 @@
       "**单页直接构建**：在用户指定目录输出 `<slug>.html` 和 `<slug>.verification.md`；未指定目录时使用当前工作区的 `courseware/<slug>/`。",
       "**紧凑课件组**：在一个目录默认输出 `index.html`、2–4 个概念页、逐页验证报告和 `README.md`；综合实验仅在有整合价值时作为可选末页。",
       "**只要提示词**：输出 `<slug>.prompt.md`，包含教学规格、HTML system/user prompt 和教学动作 prompt，不伪造已生成或已验证的 HTML。",
-      "**修改现有课件**：保留用户已有内容，只修改目标行为，并重新运行相关门禁。"
+      "**修改现有课件**：保留用户已有内容，只修改目标行为，并重新运行相关门禁。",
+      "精确 3D：附 bpy 脚本、参数与单位/公差、blend、实际导出资源及几何验证，HTML 默认自包含；prompt-only 只写制作要求。"
     ],
     "failure_modes": [
       "交互只有装饰变化，无法解释教学因果关系。",
@@ -57,7 +60,9 @@
       "重置只恢复部分变量，导致初始状态不可复现。",
       "教学动作引用不存在、重复或不可见的 DOM 目标。",
       "按术语过度拆页，或把标题、目标、场景、控制、指标、轨迹和解释同时堆在首屏。",
-      "缺少贯穿案例和最小真实用法，学习者不知道做什么用或怎样使用。"
+      "缺少贯穿案例和最小真实用法，学习者不知道做什么用或怎样使用。",
+      "动画播放代替机制解释，或答案提前泄露使理解检查失效。",
+      "以未经 bpy 制作及几何验证的画面冒充精确 3D。"
     ]
   },
   "resources": {
@@ -67,7 +72,9 @@
       "references/generation-framework.md",
       "references/pwm-example.md",
       "references/quality-gates.md",
-      "references/runtime-contract.md"
+      "references/runtime-contract.md",
+      "references/cognitive-design.md",
+      "references/blender-modeling.md"
     ],
     "scripts": [
       "scripts/validate-courseware.js"
@@ -93,7 +100,8 @@
       "evals/trigger_cases.json"
     ],
     "output": [
-      "evals/output/cases.jsonl"
+      "evals/output/cases.jsonl",
+      "evals/teaching-spatial-cases.md"
     ],
     "adversarial": [],
     "baseline": "without_skill"

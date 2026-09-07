@@ -24,6 +24,12 @@ Skill: `interactive-courseware-generator`
   - Escalate visible tradeoffs when benchmark patterns conflict with local privacy, naming, or governance constraints.
   - Do not silently broaden the skill into adjacent jobs just because the examples are nearby.
 
+## Cognitive and Geometry Contract
+
+- 教学路径由先备经验、关键误解和因果链导出，经具体机制示范、单条件对比与抽象映射进入独立预测/迁移；反馈指出错因，设计检查不等于学习效果证据。
+- 精确 3D 使用 Blender bpy，保留参数/来源/单位/公差、blend 和导出资源，验证关键几何、运动关系与页面同步；工具失败不得以近似画面冒充。
+- 详细规则见 references/cognitive-design.md 与 references/blender-modeling.md。
+
 ## Feedback Loops
 
 ### Intent boundary loop

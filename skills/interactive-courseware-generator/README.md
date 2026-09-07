@@ -58,11 +58,17 @@ courseware/<topic>/README.md
   → 静态、浏览器与学科三层验证
 ```
 
+## 认知与精确 3D
+
+先从已有经验与具体场景建立因果模型，经示范、对比和抽象映射进入独立预测或迁移，反馈指出误解。空间结构、装配或运动需要精确 3D 时，使用 Blender `bpy` 建模，交付源脚本、参数、`.blend`、实际导出资源与几何/展示检查；页面仍默认自包含。
+
 ## 资源
 
 - `SKILL.md`：触发、工作流、输出和完成标准。
 - `references/generation-framework.md`：三层中文提示词框架。
 - `references/course-suite-framework.md`：紧凑课件组的页数、贯穿案例、四拍结构与目录合同。
+- `references/cognitive-design.md`：认知路径、机制解释、理解检查和纠错。
+- `references/blender-modeling.md`：精确 3D 路由、bpy 制作、几何验证和内嵌交付。
 - `references/runtime-contract.md`：项目无关的运行和教学动作协议。
 - `references/quality-gates.md`：验证合同。
 - `references/pwm-example.md`：PWM worked example。
