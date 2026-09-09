@@ -111,6 +111,29 @@ cp skills/image/config.env.example skills/image/config.env
 
 依赖：Node.js 18+（仅用于确定性 HTML 校验器；生成页本身无第三方运行时依赖）
 
+### `direct-resumable-download`
+
+面向 macOS 的直连分段下载与断点续传工具。通过进程内清除代理环境变量、绑定
+物理网卡和 DoH 解析真实 IP 下载文件，不修改 Clash、TUN 或系统网络设置。
+
+入口：`skills/direct-resumable-download/SKILL.md`
+
+依赖：Bash、Python 3、curl（支持网卡绑定）；默认物理网卡为 `en0`。
+
+安装到共享 Skill 目录：
+
+```bash
+mkdir -p "$HOME/.agents/skills"
+ln -s "$(pwd)/skills/direct-resumable-download" "$HOME/.agents/skills/direct-resumable-download"
+```
+
+在本仓库根目录运行，且目标安装路径尚不存在时使用上述命令。
+已有安装应先备份，再建立链接。
+
+用法：`使用 $direct-resumable-download，把这个链接下载到指定目录。`
+
+---
+
 ## 从本机 Skill 源同步
 
 仓库只同步白名单中的真实 Skill，不同步嵌套 Git 元数据、缓存或评测工作区：
