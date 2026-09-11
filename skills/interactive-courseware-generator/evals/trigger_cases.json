@@ -8,7 +8,8 @@
     "Create a self-contained interactive teaching page for binary search with controls and observable state changes.",
     "给我做一套 MQTT 入门 HTML 课件，放在一个目录里，讲清楚有什么用、怎么收发消息和 QoS，别拆成太多页。",
     "这套交互课件信息太多了，帮我降低干扰，保留主实验，把命令和推导按需展开。",
-    "把 Docker 网络这个主题做成三四个有前后顺序的交互学习页，用同一个服务部署案例串起来。"
+    "把 Docker 网络这个主题做成三四个有前后顺序的交互学习页，用同一个服务部署案例串起来。",
+    "我有一份初中物理《大气压强》的完整教案，请转成一页可操作的交互课件，提问部分改成先预测后揭示。"
   ],
   "should_not_trigger": [
     "给我做一套二十页的静态 PowerPoint。",

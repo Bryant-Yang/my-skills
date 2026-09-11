@@ -1,3 +1,33 @@
+# 2026-09-11 v1.3.0 演进验证
+
+本次新增教案转译输入路径、学科可视化语言参考、密度与学段门禁，并同步触发面、IR、adapter 与元数据。没有生成完整新课件，也没有改动旧 fixture 的评分来代表新增能力。
+
+## 变更范围
+
+- `references/subject-visualization.md`（新增）：按学科选择母语可视化、母语挂接变量—现象映射、学科依据来源与不臆造条目编号规则。
+- `references/generation-framework.md`：新增输入形态判断（主题/教案/现有课件）与教案要素转译表；规划入口挂接学科可视化语言。
+- `references/cognitive-design.md`：学段决定密度与抽象度。
+- `references/quality-gates.md`：学科母语与来源门禁、去标题密度测试；验证报告模板同步。
+- `SKILL.md`：触发描述加入教案转译；资源路由、工作流第 1 步、硬规则、完成标准与回归任务类型同步。
+- 触发面：`evals/trigger_cases.json` 新增教案转译样本，`reports/skill-ir.json` 严格镜像并登记新参考。
+- `evals/test-skill-contract.js`：新增教案转译、学科母语、密度测试与来源门禁断言；版本断言升至 1.3.0。
+- `agents/interface.yaml`、`agents/openai.yaml`、`manifest.json`、`README.md`、`reports/intent-context.json`、`reports/system-model.md`、`evals/semantic_config.json` 同步。
+
+## 已执行
+
+- `test-skill-contract.js`、`test-validator.js`：通过。
+- `skill-ir.json`、`trigger_cases.json`、`manifest.json`、`intent-context.json`、`semantic_config.json` JSON 解析：通过。
+- SKILL.md 本地引用完整性由合同回归覆盖：通过。
+
+## 证据边界
+
+- 教案要素转译表与学科母语表是设计规则与评审判据，来自公开教学设计方法论的转写；本次未执行模型端到端教案转译或学科课件生成，不能称为行为回归通过。
+- 新增触发样本未运行 provider-backed 路由评测，不报告 precision 或 recall。
+- 未做实际学习者实验；学段密度规则是设计约定，不是学习效果证据。
+- 学科可视化语言不包含任何课程标准原文；引用课标原文的需求仍要求使用时核对权威来源。
+
+---
+
 # 2026-09-07 v1.2.0 增强验证
 
 本次修改认知教学路径、精确 3D 制作合同、提示词、验收规则和相关元数据。没有生成完整新课件，也没有改动旧 fixture 的评分来代表新增能力。

@@ -26,6 +26,14 @@
 不要按术语过度拆页，命令和完整协议轨迹按需展开。
 ```
 
+也可以从现有教案转译：
+
+```text
+使用 $interactive-courseware-generator，
+我有一份初中物理《大气压强》教案，把它转成一页可操作的交互课件；
+不要照搬教案排版，课堂提问改成先预测后揭示。
+```
+
 默认直接构建时交付：
 
 ```text
@@ -65,7 +73,8 @@ courseware/<topic>/README.md
 ## 资源
 
 - `SKILL.md`：触发、工作流、输出和完成标准。
-- `references/generation-framework.md`：三层中文提示词框架。
+- `references/generation-framework.md`：三层中文提示词框架与教案要素转译表。
+- `references/subject-visualization.md`：按学科选择母语可视化与依据来源。
 - `references/course-suite-framework.md`：紧凑课件组的页数、贯穿案例、四拍结构与目录合同。
 - `references/cognitive-design.md`：认知路径、机制解释、理解检查和纠错。
 - `references/blender-modeling.md`：精确 3D 路由、bpy 制作、几何验证和内嵌交付。

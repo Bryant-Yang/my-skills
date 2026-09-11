@@ -1,8 +1,8 @@
 {
   "name": "interactive-courseware-generator",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "owner": "Bryant Yang",
-  "updated_at": "2026-09-07",
+  "updated_at": "2026-09-11",
   "status": "active",
   "maturity_tier": "library",
   "lifecycle_stage": "library",

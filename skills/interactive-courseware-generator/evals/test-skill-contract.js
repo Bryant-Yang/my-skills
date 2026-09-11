@@ -34,6 +34,7 @@ const skill = read('SKILL.md');
 const suite = read('references/course-suite-framework.md');
 const framework = read('references/generation-framework.md');
 const gates = read('references/quality-gates.md');
+const subjectViz = read('references/subject-visualization.md');
 const triggerCases = parseJson('evals/trigger_cases.json');
 const manifest = parseJson('manifest.json');
 const skillIr = parseJson('reports/skill-ir.json');
@@ -50,6 +51,22 @@ for (const reference of [...skill.matchAll(/\]\((references\/[^)]+)\)/g)].map((m
   assert(fs.existsSync(path.join(skillDir, reference)), `missing referenced file: ${reference}`);
 }
 
+assert(skill.includes('教案要素转译表'), 'SKILL.md should route lesson-plan inputs through the translation table');
+assert(!skill.includes('教学目标与学情分析上屏'), 'SKILL.md must keep teaching objectives and learner analysis off the screen');
+assert(framework.includes('教案要素转译'), 'generation framework should translate lesson-plan elements');
+assert(framework.includes('先预测后揭示'), 'lesson-plan translation should convert questions into prediction checks');
+assert(
+  framework.includes('[学科可视化语言](subject-visualization.md)'),
+  'generation framework should route subject topics to the visualization vocabulary',
+);
+assert(subjectViz.includes('母语'), 'subject visualization should define the subject-native language rule');
+assert(
+  subjectViz.includes('不臆造条目编号'),
+  'subject visualization should forbid invented standard-citation numbers',
+);
+assert(gates.includes('拿掉标题'), 'quality gates should include the title-removal density test');
+assert(gates.includes('学科母语'), 'quality gates should review subject-native visualization');
+assert(gates.includes('没有臆造课标或规范条目编号'), 'quality gates should review source-grounded citations');
 assert(skill.includes('2–4 个概念页'), 'SKILL.md should define the compact suite page budget');
 assert(skill.includes('不同因果模型'), 'SKILL.md should allow distinct causal models to create separate pages');
 assert(skill.includes('不要把术语数量直接等同于页数'), 'SKILL.md should reject term-driven pagination');
@@ -80,7 +97,7 @@ assert(gates.includes('紧凑课件组检查'), 'quality gates should include su
 assert(gates.includes('普通 `<a>` 页间导航不按外部资源处理'), 'quality gates should allow local page navigation');
 assert(gates.includes('不要求满足模拟器 validator'), 'quality gates should exempt index pages from simulation validation');
 
-assert(manifest.version === '1.2.0', 'manifest should declare the evolved skill version');
+assert(manifest.version === '1.3.0', 'manifest should declare the evolved skill version');
 assert(manifest.factory_components.includes('evals'), 'manifest should include the contract eval component');
 assert(
   semanticConfig.fallback_positive_concepts.includes('course_suite'),
@@ -144,5 +161,13 @@ assert(
   triggerCases.should_trigger.some((prompt) => prompt.includes('降低干扰')),
   'trigger evals should cover simplifying an existing courseware page',
 );
+assert(
+  triggerCases.should_trigger.some((prompt) => prompt.includes('教案')),
+  'trigger evals should cover lesson-plan translation inputs',
+);
+assert(
+  skillIr.resources.references.includes('references/subject-visualization.md'),
+  'skill IR should list the subject visualization reference',
+);
 
-process.stdout.write('skill contract regression passed: suite planning, four-beat layout, practical usage, cognitive-load gates\n');
+process.stdout.write('skill contract regression passed: suite planning, four-beat layout, lesson-plan translation, subject visualization, practical usage, cognitive-load gates\n');

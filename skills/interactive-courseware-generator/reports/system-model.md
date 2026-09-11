@@ -8,17 +8,17 @@ Skill: `interactive-courseware-generator`
 
 ## System Boundary Map
 
-- Owned job: 把一个教学知识点或紧凑主题稳定转换为低干扰、贴近实际、可运行、可操作、可观察、可验证且可选支持宿主控制的交互式 HTML 课件。
+- Owned job: 把一个教学知识点、紧凑主题或已有教案稳定转换为低干扰、贴近实际、可运行、可操作、可观察、可验证且可选支持宿主控制的交互式 HTML 课件。
 - Output boundary: 单页自包含课件，或同一目录中默认 2–4 个概念页、可选综合实验、目录与逐页验证报告。
 - Maturity assumption: `library`
 - Input boundary:
-  - 主题、学习目标、学习者、变量、现象、学科模型或现有 HTML。
+  - 主题、学习目标、学习者、变量、现象、学科模型、完整教案或现有 HTML。
 - Non-goals:
   - 静态幻灯片、学期级课程大纲、普通网站、教学平台、只解释源码。
 - Constraints:
   - 项目无关；不依赖特定产品、仓库或私有协议；每个交互页默认单文件、无远程依赖；真实验证与模型自检分开。
 - Standards:
-  - 页数按学习问题、因果模型、观察对象和先备关系共同确定；变量必须映射到可观察现象；默认界面按问题、主要操作、核心现象、结论组织；真实案例与最小用法进入主线；确定性逻辑由普通代码实现；学科不确定性必须披露。
+  - 页数按学习问题、因果模型、观察对象和先备关系共同确定；变量必须映射到可观察现象；默认界面按问题、主要操作、核心现象、结论组织；真实案例与最小用法进入主线；确定性逻辑由普通代码实现；学科不确定性必须披露；学科图示使用学科母语，权威依据注明来源、不臆造条目编号。
 - Human judgment boundary:
   - Infer non-core gaps visibly; ask one focused clarification only for an unresolved core job, primary output, or explicit direction conflict.
   - Escalate visible tradeoffs when benchmark patterns conflict with local privacy, naming, or governance constraints.
