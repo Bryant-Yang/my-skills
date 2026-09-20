@@ -134,6 +134,22 @@ ln -s "$(pwd)/skills/direct-resumable-download" "$HOME/.agents/skills/direct-res
 
 ---
 
+### `vcut`
+
+本地离线视频字幕流水线：MLX Qwen3-ASR 转写 + ForcedAligner 字级对齐，Agent 负责校对、翻译，FFmpeg 裁切/烧录成片。全程离线，无需任何 API Key 或在线服务。仅支持 Apple Silicon。
+
+**用法：**
+
+```
+Use $vcut，为 /path/to/video.mp4 做中文字幕并烧录成片
+```
+
+首次使用先运行 `skills/vcut/scripts/setup.sh`（创建 venv、装依赖、从 HuggingFace
+下载模型）。CLI 接口与约束见 `skills/vcut/localcut/README.md`；工作流与验收
+要求见 `skills/vcut/SKILL.md`。
+
+---
+
 ## 从本机 Skill 源同步
 
 仓库只同步白名单中的真实 Skill，不同步嵌套 Git 元数据、缓存或评测工作区：
