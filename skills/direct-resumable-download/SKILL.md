@@ -1,6 +1,6 @@
 ---
 name: direct-resumable-download
-description: Use this skill whenever the user wants fast resumable downloads, large model/video/audio/file downloads, Hugging Face direct file downloads, or explicitly says "不要走 Clash", "不要走 Clash Verge TUN", "绕开代理流量", "直连下载", "断点续传", "续传", "aria2", "curl -C", or asks to download missing ComfyUI/LM Studio/Ollama/local AI assets. It always uses the process-local interface-resolve downloader: clear proxy env, bind curl to a physical interface, resolve true IPs through DoH, pin TLS with --resolve, and resume with byte ranges. It never changes Clash Verge, TUN, VPN, DNS, Wi-Fi, or system route settings.
+description: 'Use this skill whenever the user wants fast resumable downloads, large model/video/audio/file downloads, Hugging Face direct file downloads, or explicitly says "不要走 Clash", "不要走 Clash Verge TUN", "绕开代理流量", "直连下载", "断点续传", "续传", "aria2", "curl -C", or asks to download missing ComfyUI/LM Studio/Ollama/local AI assets. It always uses the process-local interface-resolve downloader: clear proxy env, bind curl to a physical interface, resolve true IPs through DoH, pin TLS with --resolve, and resume with byte ranges. It never changes Clash Verge, TUN, VPN, DNS, Wi-Fi, or system route settings.'
 ---
 
 # Direct Resumable Download
