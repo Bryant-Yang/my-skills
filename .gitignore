@@ -14,3 +14,4 @@ skills/image/prompts.json
 skills/vcut/.venv/
 skills/vcut/models/
 skills/vcut/projects/
+.venv

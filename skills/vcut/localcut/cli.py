@@ -6,18 +6,50 @@ import fcntl
 import json
 import math
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ASR = Path(os.environ.get('VCUT_ASR_MODEL') or ROOT / 'models/mlx-community/Qwen3-ASR-1.7B-8bit')
 ALIGN = Path(os.environ.get('VCUT_ALIGNER_MODEL') or ROOT / 'models/Qwen/Qwen3-ForcedAligner-0.6B')
+WHISPER = Path(os.environ.get('VCUT_ASR_MODEL') or ROOT / 'models/mlx-community/whisper-large-v3-turbo-q4')
+WHISPER_LANG = {'chinese': 'zh', 'english': 'en', 'japanese': 'ja', 'korean': 'ko', 'french': 'fr',
+                'german': 'de', 'spanish': 'es', 'russian': 'ru', 'portuguese': 'pt', 'italian': 'it',
+                'cantonese': 'yue', 'arabic': 'ar', 'hindi': 'hi', 'thai': 'th', 'vietnamese': 'vi',
+                'indonesian': 'id'}
+
+
+def engine_of(manifest):
+    return manifest.get('engine') or os.environ.get('VCUT_ENGINE') or 'qwen3'
+
+
+def asr_model_of(manifest):
+    if os.environ.get('VCUT_ASR_MODEL'):
+        return os.environ['VCUT_ASR_MODEL']
+    if engine_of(manifest) == 'whisper':
+        return manifest.get('asr_model') or str(WHISPER)
+    return str(ASR)
+
+
+def whisper_available(model):
+    path = Path(str(model))
+    if path.is_dir():
+        return True
+    try:
+        from huggingface_hub import snapshot_download
+        snapshot_download(repo_id=str(model), local_files_only=True)
+        return True
+    except Exception:
+        return False
 
 
 def read(path):
-    return json.loads(Path(path).read_text())
+    try:
+        return json.loads(Path(path).read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f'Cannot read JSON from {path}: {exc}') from exc
 
 
 def write(path, value):
@@ -32,7 +64,10 @@ def run(args):
 
 
 def duration(path):
-    value = float(run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', str(path)]))
+    try:
+        value = float(run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', str(path)]))
+    except ValueError as exc:
+        raise ValueError(f'Invalid media duration: {path}') from exc
     if not math.isfinite(value) or value <= 0:
         raise ValueError('Invalid media duration')
     return value
@@ -113,12 +148,16 @@ def captions(words):
     buf = []
     def flush():
         if buf:
-            # Spaces between Latin words must survive Chinese character aggregation.
+            # Spaces between Latin words must survive Chinese character aggregation;
+            # sentence punctuation keeps its following word spaced ("world. This").
             text = ''
             for w in buf:
                 part = w['text']
-                if text and part and text[-1].isascii() and text[-1].isalnum() and part[0].isascii() and part[0].isalnum():
-                    text += ' '
+                if text and part:
+                    last, first = text[-1], part[0]
+                    if (last.isascii() and last.isalnum() and first.isascii() and first.isalnum()) \
+                            or (last in '.!?' and first.isascii() and first.isalpha()):
+                        text += ' '
                 text += part
             rows.append({'start': buf[0]['start'], 'end': buf[-1]['end'], 'text': text})
             buf.clear()
@@ -145,11 +184,51 @@ def export(project, data):
     return {'directory': str(out), 'cues': len(rows)}
 
 
+def whisper_result(value):
+    """Flatten OpenAI-style segments with DTW words into the internal word list.
+    Pure punctuation tokens ride on the previous word so aggregated cue text
+    keeps natural spacing (ForcedAligner drops punctuation; whisper does not)."""
+    words = []
+    for seg in value['segments']:
+        for w in seg.get('words') or []:
+            try:
+                start, end = float(w['start']), float(w['end'])
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f'Malformed whisper word {w!r}') from exc
+            text = str(w.get('word', '')).strip()
+            if not text or end < start:
+                continue
+            if words and (not any(c.isalnum() for c in text) or text[0] in '\'’'):
+                words[-1]['text'] += text
+                words[-1]['end'] = end
+                continue
+            words.append({'text': text, 'start': start, 'end': end})
+    return {'text': str(value.get('text', '')).strip(), 'segments': words, 'truncated': False}
+
+
+def infer_chunk(wav, manifest, engine, model):
+    if engine == 'whisper':
+        import mlx_whisper
+        lang = manifest['language'].strip()
+        result = mlx_whisper.transcribe(str(wav), path_or_hf_repo=model,
+                                        language=WHISPER_LANG.get(lang.lower(), lang) or None,
+                                        word_timestamps=True, condition_on_previous_text=False,
+                                        initial_prompt=manifest['context'] or None, verbose=False)
+        return whisper_result(result)
+    from mlx_qwen3_asr import transcribe as infer
+    result = infer(str(wav), model=model, forced_aligner=str(ALIGN), language=manifest['language'], context=manifest['context'], return_timestamps=True, return_chunks=True)
+    return dataclasses.asdict(result)
+
+
 def transcribe(project, manifest):
     if fingerprint(manifest['media']) != manifest['media_fingerprint']:
         raise ValueError('Source media changed; create a new project')
     os.environ['HF_HUB_OFFLINE'] = '1'
-    from mlx_qwen3_asr import transcribe as infer
+    engine, model = engine_of(manifest), asr_model_of(manifest)
+    if engine not in ('qwen3', 'whisper'):
+        raise ValueError(f'Unknown engine: {engine}')
+    if engine == 'whisper' and not whisper_available(model):
+        raise ValueError(f'Whisper model not found locally: {model}; run scripts/setup.sh --engine whisper')
     work = project / 'chunks'
     work.mkdir(exist_ok=True)
     words, texts = [], []
@@ -158,9 +237,11 @@ def transcribe(project, manifest):
         if not cache.exists():
             wav = work / f'{index:04}.wav'
             subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', str(offset), '-i', manifest['media'], '-t', str(min(300, manifest['duration'] - offset)), '-vn', '-ac', '1', '-ar', '16000', str(wav)], check=True)
-            result = infer(str(wav), model=str(ASR), forced_aligner=str(ALIGN), language=manifest['language'], context=manifest['context'], return_timestamps=True, return_chunks=True)
-            value = dataclasses.asdict(result)
-            if value.get('truncated') or not value.get('segments'):
+            value = infer_chunk(wav, manifest, engine, model)
+            if value.get('truncated'):
+                raise ValueError(f'Chunk {index} incomplete; not cached')
+            # Whisper treats a silent chunk as legitimately empty; Qwen does not.
+            if engine != 'whisper' and not value.get('segments'):
                 raise ValueError(f'Chunk {index} incomplete; not cached')
             write(cache, value)
             wav.unlink()
@@ -168,7 +249,8 @@ def transcribe(project, manifest):
         texts.append(value['text'])
         words.extend({**w, 'start': w['start'] + offset, 'end': w['end'] + offset} for w in value['segments'])
         print(json.dumps({'event': 'chunk_done', 'index': index, 'offset': offset}), file=sys.stderr, flush=True)
-    data = {'text': '\n\n'.join(texts), 'duration': manifest['duration'], 'segments': words, 'model': str(ASR), 'aligner': str(ALIGN)}
+    data = {'text': '\n\n'.join(texts), 'duration': manifest['duration'], 'segments': words,
+            'engine': engine, 'model': model, 'aligner': str(ALIGN)}
     if check(data)['errors']:
         raise ValueError(check(data))
     write(project / 'raw.json', data)
@@ -190,6 +272,8 @@ def main():
             p.add_argument('media', type=Path)
             p.add_argument('--language', default='Chinese')
             p.add_argument('--context', default='')
+            p.add_argument('--engine', default=None, choices=('qwen3', 'whisper'))
+            p.add_argument('--asr-model', default=None, dest='asr_model')
         if name == 'import':
             p.add_argument('transcript', type=Path)
         if name in ('check', 'export', 'find'):
@@ -202,7 +286,14 @@ def main():
             p.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     if args.cmd == 'doctor':
-        result = {'asr': str(ASR), 'aligner': str(ALIGN), 'models_present': all((p / 'model.safetensors').is_file() for p in (ASR, ALIGN)), 'ffmpeg': shutil.which('ffmpeg'), 'ffprobe': shutil.which('ffprobe'), 'python': sys.executable}
+        whisper_model = os.environ.get('VCUT_ASR_MODEL') or str(WHISPER)
+        qwen_ready = all((p / 'model.safetensors').is_file() for p in (ASR, ALIGN))
+        whisper_ready = whisper_available(whisper_model)
+        result = {'default_engine': os.environ.get('VCUT_ENGINE') or 'qwen3',
+                  'qwen': {'asr': str(ASR), 'aligner': str(ALIGN), 'present': qwen_ready},
+                  'whisper': {'model': whisper_model, 'present': whisper_ready},
+                  'models_present': qwen_ready or whisper_ready,
+                  'ffmpeg': shutil.which('ffmpeg'), 'ffprobe': shutil.which('ffprobe'), 'python': sys.executable}
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0 if all(result[k] for k in ('models_present', 'ffmpeg', 'ffprobe')) else 2
     project = args.project.resolve()
@@ -210,14 +301,18 @@ def main():
         media = args.media.resolve(strict=True)
         length = duration(media)
         project.mkdir(parents=True, exist_ok=False)
-        write(project / 'project.json', {'schema': 1, 'media': str(media), 'media_fingerprint': fingerprint(media), 'duration': length, 'language': args.language, 'context': args.context})
+        manifest = {'schema': 1, 'media': str(media), 'media_fingerprint': fingerprint(media), 'duration': length, 'language': args.language, 'context': args.context, 'engine': args.engine or os.environ.get('VCUT_ENGINE') or 'qwen3'}
+        if args.asr_model:
+            manifest['asr_model'] = args.asr_model
+        write(project / 'project.json', manifest)
         print(json.dumps({'project': str(project)}))
         return 0
     manifest = read(project / 'project.json')
+    auto_check = None
     with (project / '.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         if args.cmd in ('prepare-review', 'apply-review'):
-            from review import prepare, apply
+            from review import apply, prepare
             if fingerprint(manifest['media']) != manifest['media_fingerprint']:
                 raise ValueError('Source media changed')
             result = (prepare(project, manifest, args.output) if args.cmd == 'prepare-review'
@@ -240,9 +335,10 @@ def main():
             if args.cmd == 'auto':
                 data = repair(data)
                 write(project / 'repaired.json', data)
-                if not check(data)['passed']:
-                    raise ValueError(check(data))
-                result = {'check': check(data), 'export': export(project, data)}
+                auto_check = check(data)
+                if not auto_check['passed']:
+                    raise ValueError(auto_check)
+                result = {'check': auto_check, 'export': export(project, data)}
             else:
                 result = check(data)
         elif args.cmd == 'repair':
@@ -273,9 +369,9 @@ def main():
             else:
                 result = [row for row in captions(data['segments']) if args.query.lower() in row['text'].lower()]
         print(json.dumps(result, ensure_ascii=False, indent=2))
-        if isinstance(result, dict) and result.get('passed') is False:
+        if isinstance(result, dict) and not result.get('passed', True):
             return 2
-        if args.cmd == 'auto' and not result['check']['passed']:
+        if auto_check is not None and not auto_check['passed']:
             return 2
     return 0
 

@@ -3,9 +3,10 @@ import copy
 import hashlib
 import json
 import os
-from pathlib import Path
+import re
 import subprocess
 import tempfile
+from pathlib import Path
 
 from cli import ALIGN, captions, check, read, repair, stamp, write
 
@@ -43,7 +44,7 @@ def validate(value, expected):
     rows = value['rows']
     if not isinstance(rows, list) or len(rows) != len(expected['rows']):
         raise ValueError('Review must retain every row in order')
-    for row, original in zip(rows, expected['rows']):
+    for row, original in zip(rows, expected['rows'], strict=True):
         if not isinstance(row, dict) or set(row) != set(original):
             raise ValueError('Invalid row fields')
         for key in ('id', 'text', 'start', 'end'):
@@ -112,6 +113,33 @@ def align_rows(rows, manifest):
     return result
 
 
+TOKEN = re.compile(r"[0-9A-Za-z_'’-]+|[\u3400-\u9fff\uf900-\ufaff\u3040-\u30ff\uac00-\ud7af]|\S")
+
+
+def tokens(text):
+    return TOKEN.findall(text)
+
+
+def aligner_ready():
+    return (ALIGN / 'model.safetensors').is_file()
+
+
+def distribute_rows(rows, manifest):
+    """Fallback when the ForcedAligner is absent (e.g. whisper engine): even
+    redistribution inside each corrected cue, honestly marked as interpolated."""
+    result = []
+    for row in rows:
+        items = tokens(row['corrected'])
+        if not items:
+            raise ValueError(f'Corrected source has no tokens: {row["id"]}')
+        step = (row['end'] - row['start']) / len(items)
+        for k, text in enumerate(items):
+            start = row['start'] + k * step
+            result.append({'text': text, 'start': start, 'end': start + step,
+                           'timing_method': 'interpolated-not-acoustically-verified', 'row_id': row['id']})
+    return result
+
+
 def render(rows, key, fmt, bilingual=False):
     content = 'WEBVTT\n\n' if fmt == 'vtt' else ''
     for i, row in enumerate(rows, 1):
@@ -133,11 +161,15 @@ def apply(project, manifest, review_path, output, align=align_rows):
         raise ValueError('Output exists; choose a new revision directory')
     data, _ = source(project, manifest)
     changed = any(r['corrected'] != r['text'] for r in value['rows'])
-    words = align(value['rows'], manifest) if changed else copy.deepcopy(data['segments'])
+    if not changed:
+        words, method = copy.deepcopy(data['segments']), 'original-source-timing'
+    elif aligner_ready():
+        words, method = align(value['rows'], manifest), 'forced-aligner-per-source-cue'
+    else:
+        words, method = distribute_rows(value['rows'], manifest), 'interpolated-cue-redistribution'
     checked = {'text': '\n'.join(r['corrected'] for r in value['rows']),
                'duration': manifest['duration'], 'segments': words,
-               'source_sha256': value['source_sha256'],
-               'timing_method': 'forced-aligner-per-source-cue' if changed else 'original-source-timing'}
+               'source_sha256': value['source_sha256'], 'timing_method': method}
     if not check(checked)['passed']:
         raise ValueError(f'Review timing failed: {check(checked)}')
     # Publish only complete revisions, preserving raw transcripts and prior exports.
