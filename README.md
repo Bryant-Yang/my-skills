@@ -13,6 +13,23 @@ git clone <repo-url> ~/.claude/skills
 
 ## Skills
 
+### `code-video`
+
+用代码制作与修复动画、音乐视频和讲解视频，统一视觉叙事、实际音频时间轴、
+Canvas/p5 逐帧渲染、可选 HyperFrames 桥接和编码成片验收。提供独立于个人工程路径的
+最小 Canvas 样板、渲染器与技术验证器。
+
+入口：[`skills/code-video/SKILL.md`](skills/code-video/SKILL.md)
+
+验收记录：[`skills/code-video/evals/acceptance.md`](skills/code-video/evals/acceptance.md)
+
+用法：`使用 $code-video，基于这份脚本和已有音频制作一个竖屏讲解视频。`
+
+依赖：使用附带 Canvas 导出工具时需 Node.js、已安装的 puppeteer-core、Chrome/Chromium、
+FFmpeg/ffprobe；技术验证器使用 Python 3 标准库。只读视觉审阅无这些运行时依赖。
+
+---
+
 ### `generate-wedding-slideshow`
 
 给一组照片和一段歌单描述，生成一套完整的婚礼展示项目。

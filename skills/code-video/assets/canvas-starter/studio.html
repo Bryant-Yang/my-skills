@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Canvas rendering contract</title>
+<style>
+  html,body{margin:0;background:#eee}canvas{display:block;width:min(100vw,1280px);height:auto}
+</style>
+<canvas id="out" width="1280" height="720" aria-label="确定性时间轴技术样板"></canvas>
+<script>
+// This minimal contract example is deliberately not a finished visual template.
+const canvas = document.querySelector('#out');
+const ctx = canvas.getContext('2d');
+function drawFrame(time) {
+  if (!Number.isFinite(time) || time < 0) throw new Error('time must be finite and non-negative');
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.globalAlpha = 1;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#f4f3ed';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  const progress = Math.min(time / 2, 1);
+  ctx.fillStyle = '#26354a';
+  ctx.fillRect(140 + progress * 800, 320, 80, 80);
+  ctx.font = '32px sans-serif';
+  ctx.fillText('renderAt(t) — deterministic frame', 140, 180);
+}
+window.renderAt = (time, type = 'image/png', quality = 1) => {
+  drawFrame(time);
+  return canvas.toDataURL(type,quality);
+};
+window.ready = false;
+(async () => {
+  await document.fonts.ready;
+  drawFrame(0);
+  window.ready = true;
+})();
+</script>
+</html>

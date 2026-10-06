@@ -1,0 +1,4 @@
+interface:
+  display_name: "代码视频制作"
+  short_description: "统一视觉叙事、真实音频时间轴、画布逐帧渲染与编码成片验收"
+  default_prompt: "使用 $code-video，按具体解释或故事目标制作可复现的视频，并检查实际编码成片。"
