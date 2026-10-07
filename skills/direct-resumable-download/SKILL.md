@@ -24,8 +24,10 @@ The interface-resolve downloader is intentionally process-local and aggressive:
 - resolves original and redirected HTTPS hosts through DoH, default `dns.alidns.com` via `223.5.5.5`;
 - pins TLS connections with `--resolve host:443:ip`;
 - downloads byte ranges into `<filename>.parts`;
-- resumes from partial ranges;
-- assembles the final file only after every part reaches the expected size.
+- resolves relative and multi-hop redirects, pinning each HTTPS hop;
+- validates `206`, exact `Content-Range`, response size and identity encoding before accepting range bytes;
+- resumes only matching source identity, size and range-layout metadata;
+- assembles exact-size parts without truncation, validates optional published SHA-256 before replacing the destination.
 
 If that process-local route cannot resolve, cannot determine size, cannot establish TLS, or repeatedly fails, stop and report the exact blocker. Do not fall back to Clash/TUN traffic.
 
@@ -62,24 +64,30 @@ If that process-local route cannot resolve, cannot determine size, cannot establ
    DIRECT_DL_DOH_HOST=dns.alidns.com
    DIRECT_DL_DOH_IP=223.5.5.5
    DIRECT_DL_PROGRESS_INTERVAL=30
+   DIRECT_DL_MAX_ATTEMPTS=4
+   DIRECT_DL_REQUEST_TIMEOUT=300
+   DIRECT_DL_SMALL_FILE_THRESHOLD=33554432
+   DIRECT_DL_SHA256="<published-64-hex-checksum>"
    ```
 
 5. Verify completion.
-   - Check final file size against the expected size printed by the downloader.
+   - Supply `DIRECT_DL_SHA256` whenever a published checksum is available. The downloader rejects a mismatch and retains parts without replacing the destination.
+   - Check final size and reported SHA-256. A computed hash without a trusted expected value is not authenticity verification.
    - For safetensors, open with `safe_open(..., framework="pt", device="cpu")`.
    - For ComfyUI models, query `http://127.0.0.1:8188/object_info/<loader>` when ComfyUI is running.
    - Delete `.parts` directories only after final files have been verified.
 
-## Current implementation limits
+## Resume and failure handling
 
-- Use only a trusted HTTPS source that correctly honors byte-range requests. The
-  downloader checks assembled size but does not validate HTTP Content-Range or
-  a content hash; size alone does not prove integrity. Verify a published checksum
-  or the file format before using the result.
-- Resume only the same unchanged file with the same `DIRECT_DL_SPLIT` value and
-  destination. Parts do not store a source identity or range-layout manifest.
-- Repeated range failures currently retry without a built-in attempt limit.
-  Monitor the process and interrupt it when failures repeat, as required above.
+- Small files (at most 32 MiB by default) use one part. A `200` response is accepted only for an exact complete whole-file request; ignored partial ranges never count as success.
+- `<filename>.parts/manifest.json` records a hash of the original URL, remote ETag/Last-Modified, size, range layout and expected checksum. Signed redirect URLs are not persisted.
+- Changed identity/layout, unidentified legacy parts, oversized parts and integrity/protocol errors stop safely; do not delete or silently adopt old parts. Use a new destination, or obtain permission before moving/removing existing user data.
+- Retry/cross-run resume requires a validator or a supplied expected SHA-256. Without either, use one complete whole-file transfer. An existing final file is re-hashed against the expected or previously recorded checksum; matching size alone never skips verification.
+- Transport errors, HTTP 408/429/5xx have bounded exponential retry (four attempts total by default). Refreshed redirect metadata must keep the same source identity. Protocol errors fail without retry.
+- GET redirects are not followed implicitly: every hop must first be discovered and pinned. If a transfer redirects again, rerun from the original URL after resolving the cause.
+- A per-destination lock prevents simultaneous downloaders mixing parts. Keep `.parts` until final-file verification; active legacy downloads should finish before upgrading.
+
+Run isolated regression tests with `python3 -B -m unittest discover -s scripts/tests -v` from this skill directory. They use loopback HTTP fixtures; no model downloads or system networking changes.
 
 ## Reporting
 

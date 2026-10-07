@@ -12,6 +12,10 @@ Environment:
   DIRECT_DL_DOH_HOST=dns.alidns.com
   DIRECT_DL_DOH_IP=223.5.5.5
   DIRECT_DL_PROGRESS_INTERVAL=30
+  DIRECT_DL_MAX_ATTEMPTS=4         Maximum transfer attempts, including the first.
+  DIRECT_DL_REQUEST_TIMEOUT=300    Per-request timeout, seconds.
+  DIRECT_DL_SMALL_FILE_THRESHOLD=33554432  At/below this size use one part.
+  DIRECT_DL_SHA256=<64 hex chars>  Published checksum, when available.
 
 Policy:
   This downloader always uses interface-resolve mode:
@@ -30,7 +34,7 @@ url="$1"
 dest_dir="$2"
 out_name="${3:-}"
 
-echo "URL: $url"
+echo "Source URL supplied (query values are not logged)"
 echo "Destination directory: $dest_dir"
 if [[ -n "$out_name" ]]; then
   echo "Output filename: $out_name"
