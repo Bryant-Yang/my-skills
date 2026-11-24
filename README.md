@@ -15,9 +15,9 @@ git clone <repo-url> ~/.claude/skills
 
 ### `code-video`
 
-用代码制作与修复动画、音乐视频和讲解视频，统一视觉叙事、实际音频时间轴、
+用代码制作与修复动画、音乐视频和讲解视频，统一视觉叙事、一幕多句音频时间轴、
 Canvas/p5 逐帧渲染、可选 HyperFrames 桥接和编码成片验收。提供独立于个人工程路径的
-最小 Canvas 样板、渲染器与技术验证器。
+最小 Canvas 样板、免音频关键帧抽检与多页面并行渲染器，以及流/章节/转写技术验证器。
 
 入口：[`skills/code-video/SKILL.md`](skills/code-video/SKILL.md)
 

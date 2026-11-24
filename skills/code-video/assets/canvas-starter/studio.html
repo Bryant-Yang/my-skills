@@ -9,9 +9,29 @@
 </style>
 <canvas id="out" width="1280" height="720" aria-label="确定性时间轴技术样板"></canvas>
 <script>
-// This minimal contract example is deliberately not a finished visual template.
+// Minimal contract example: pure renderAt(t), wipe-safe clipping, and optional overflow telemetry.
 const canvas = document.querySelector('#out');
 const ctx = canvas.getContext('2d');
+window.__layoutWarnings = [];
+
+function clipRect(x, y, w, h, draw) {
+  if (w <= 0 || h <= 0) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, y, w, h);
+  ctx.clip();
+  draw();
+  ctx.restore();
+}
+
+function fitText(text, x, y, maxWidth, time) {
+  const measured = ctx.measureText(text).width;
+  if (measured > maxWidth) {
+    window.__layoutWarnings.push({ time, text, overflowPx: Math.round(measured - maxWidth) });
+  }
+  ctx.fillText(text, x, y);
+}
+
 function drawFrame(time) {
   if (!Number.isFinite(time) || time < 0) throw new Error('time must be finite and non-negative');
   ctx.setTransform(1,0,0,1,0,0);
@@ -20,11 +40,19 @@ function drawFrame(time) {
   ctx.fillStyle = '#f4f3ed';
   ctx.fillRect(0,0,canvas.width,canvas.height);
   const progress = Math.min(time / 2, 1);
+  const barW = 180 + progress * 620;
   ctx.fillStyle = '#26354a';
-  ctx.fillRect(140 + progress * 800, 320, 80, 80);
+  ctx.fillRect(140, 320, barW, 80);
+  clipRect(140, 320, barW, 80, () => {
+    ctx.fillStyle = '#f4f3ed';
+    ctx.font = '26px sans-serif';
+    ctx.fillText('clipped label inside growing bar', 164, 368);
+  });
+  ctx.fillStyle = '#26354a';
   ctx.font = '32px sans-serif';
-  ctx.fillText('renderAt(t) — deterministic frame', 140, 180);
+  fitText('renderAt(t) — deterministic frame', 140, 180, 960, time);
 }
+
 window.renderAt = (time, type = 'image/png', quality = 1) => {
   drawFrame(time);
   return canvas.toDataURL(type,quality);

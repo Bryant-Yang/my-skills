@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify observable media properties; no aesthetic or listening claim."""
+"""Verify observable media properties; no aesthetic or human listening claim."""
 
 import argparse
 import json
@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from collections import Counter
 from fractions import Fraction
 from pathlib import Path
 
@@ -35,6 +36,27 @@ def positive_int(value):
     return number
 
 
+def unit_ratio(value):
+    number = float(value)
+    if not math.isfinite(number) or number <= 0 or number > 1:
+        raise argparse.ArgumentTypeError("must be in (0, 1]")
+    return number
+
+
+def normalize_text(text):
+    # Keep letters, digits, and CJK ideographs; strip whitespace and punctuation.
+    return re.sub(r"[^\w\u4e00-\u9fff]+", "", text.lower(), flags=re.UNICODE).replace("_", "")
+
+
+def multiset_recall(expected_norm, observed_norm):
+    if not expected_norm:
+        return 1.0
+    exp_counts = Counter(expected_norm)
+    obs_counts = Counter(observed_norm)
+    matched = sum(min(count, obs_counts[ch]) for ch, count in exp_counts.items())
+    return matched / len(expected_norm)
+
+
 def require_separate_report(video, destination):
     if video.resolve() == destination.resolve() or (
             video.exists() and destination.exists() and video.samefile(destination)):
@@ -42,8 +64,6 @@ def require_separate_report(video, destination):
 
 
 def write_report(video, destination, report):
-    # Recheck immediately before writing; atomic replacement also preserves the
-    # old target inode if another directory entry points at the same input file.
     require_separate_report(video, destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = None
@@ -68,6 +88,14 @@ def main():
     parser.add_argument("--duration", type=positive_number)
     parser.add_argument("--frames", type=positive_int)
     parser.add_argument("--channels", type=positive_int)
+    parser.add_argument("--expect-chapters", type=positive_int,
+                        help="require this exact number of monotonic non-empty container chapters")
+    parser.add_argument("--transcript-file", type=Path,
+                        help="ASR transcript produced from the encoded video's audio stream")
+    parser.add_argument("--expected-text-file", type=Path,
+                        help="expected spoken narration text to reconcile against --transcript-file")
+    parser.add_argument("--min-char-coverage", type=unit_ratio, default=0.78,
+                        help="minimum normalized character recall when --expected-text-file is given")
     parser.add_argument("--allow-silent-audio", action="store_true",
                         help="permit intentionally silent audio; a stream is still required")
     parser.add_argument("--duration-tolerance", type=positive_number,
@@ -78,10 +106,16 @@ def main():
                         help="reject decoded sample peaks at or above this dBFS value")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
-    report = {"schema": 1, "passed": False, "checks": {}, "errors": [],
-              "limits": ["No semantic, aesthetic, human listening, or learning validation.",
-                         "Peak checks inspect decoded samples, not intersample true peaks.",
-                         "Non-silence is an RMS threshold check, not speech intelligibility."]}
+    limits = [
+        "No semantic, aesthetic, human listening, or learning validation.",
+        "Peak checks inspect decoded samples, not intersample true peaks.",
+        "Non-silence is an RMS threshold check, not speech intelligibility.",
+    ]
+    if args.transcript_file is not None or args.expected_text_file is not None:
+        limits.append(
+            "ASR transcript reconciliation checks text recall, not pronunciation, voice identity, prosody, or mix quality."
+        )
+    report = {"schema": 1, "passed": False, "checks": {}, "errors": [], "limits": limits}
     report_writable = args.report is not None
     try:
         if args.report:
@@ -90,6 +124,8 @@ def main():
             except (RuntimeError, OSError) as exc:
                 report_writable = False
                 raise RuntimeError(str(exc)) from exc
+        if bool(args.transcript_file) != bool(args.expected_text_file):
+            raise RuntimeError("provide both --transcript-file and --expected-text-file, or neither")
         for name in ("ffprobe", "ffmpeg"):
             if not shutil.which(name):
                 raise RuntimeError(f"{name} is required on PATH")
@@ -100,10 +136,11 @@ def main():
         if args.silence_threshold_db >= args.peak_limit_db or args.peak_limit_db > 0:
             raise RuntimeError("audio thresholds require silence < peak limit <= 0 dBFS")
         data = json.loads(run(["ffprobe", "-v", "error", "-count_frames",
-                               "-show_streams", "-show_format", "-of", "json",
+                               "-show_streams", "-show_chapters", "-show_format", "-of", "json",
                                str(args.video.resolve())]).stdout)
         videos = [s for s in data["streams"] if s["codec_type"] == "video"]
         audios = [s for s in data["streams"] if s["codec_type"] == "audio"]
+        chapters = data.get("chapters", [])
         if len(videos) != 1 or len(audios) != 1:
             raise RuntimeError("expected exactly one video and one audio stream")
         video, audio = videos[0], audios[0]
@@ -115,13 +152,21 @@ def main():
         video_duration, audio_duration = float(video["duration"]), float(audio["duration"])
         container_duration = float(data["format"]["duration"])
         tolerance = args.duration_tolerance or (1 / fps + 0.055)
-        report["observed"] = {"width": video["width"], "height": video["height"],
-                              "fps": fps, "frames": frame_count, "channels": audio["channels"],
-                              "video_codec": video["codec_name"], "audio_codec": audio["codec_name"],
-                              "pixel_format": video.get("pix_fmt"),
-                              "video_duration": video_duration, "audio_duration": audio_duration,
-                              "container_duration": container_duration,
-                              "duration_tolerance": tolerance}
+        report["observed"] = {
+            "width": video["width"],
+            "height": video["height"],
+            "fps": fps,
+            "frames": frame_count,
+            "channels": audio["channels"],
+            "chapters": len(chapters),
+            "video_codec": video["codec_name"],
+            "audio_codec": audio["codec_name"],
+            "pixel_format": video.get("pix_fmt"),
+            "video_duration": video_duration,
+            "audio_duration": audio_duration,
+            "container_duration": container_duration,
+            "duration_tolerance": tolerance,
+        }
         if min(frame_count, video_duration, audio_duration, container_duration) <= 0:
             raise RuntimeError("media has an empty stream")
         for key in ("width", "height", "channels"):
@@ -144,6 +189,23 @@ def main():
                                     ("container", container_duration)):
                 if abs(duration - args.duration) > tolerance:
                     report["errors"].append(f"{label} duration differs from expected {args.duration}")
+        if args.expect_chapters is not None:
+            valid_chapters = len(chapters) == args.expect_chapters
+            prev_end = 0.0
+            for ch in chapters:
+                ch_start = float(ch.get("start_time", -1))
+                ch_end = float(ch.get("end_time", -1))
+                ch_title = str(ch.get("tags", {}).get("title", "")).strip()
+                if not (ch_title and ch_start >= -0.001 and ch_end > ch_start and
+                        abs(ch_start - prev_end) <= tolerance and ch_end <= container_duration + tolerance):
+                    valid_chapters = False
+                    break
+                prev_end = ch_end
+            report["checks"]["chapters_valid"] = valid_chapters
+            if not valid_chapters:
+                report["errors"].append(
+                    f"chapters: expected {args.expect_chapters} contiguous titled chapters within duration, got {len(chapters)}"
+                )
         timestamps = run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_frames",
                           "-show_entries", "frame=best_effort_timestamp_time", "-of", "csv=p=0",
                           str(args.video.resolve())]).stdout
@@ -170,7 +232,6 @@ def main():
         run(["ffmpeg", "-nostdin", "-v", "error", "-xerror", "-i", str(args.video.resolve()),
              "-map", "0:v:0", "-map", "0:a:0", "-f", "null", "-"])
         report["checks"]["full_decode"] = True
-        # float PCM avoids integer conversion hiding a full-scale decoded peak.
         levels = run(["ffmpeg", "-nostdin", "-hide_banner", "-i", str(args.video.resolve()),
                       "-map", "0:a:0", "-vn", "-af", "astats=metadata=0:reset=0",
                       "-f", "null", "-"]).stderr
@@ -189,6 +250,21 @@ def main():
             report["errors"].append("audio is silent or below RMS threshold")
         if math.isfinite(peak) and not report["checks"]["sample_peak_below_limit"]:
             report["errors"].append("decoded audio reaches configured peak limit")
+        if args.transcript_file and args.expected_text_file:
+            if not args.transcript_file.is_file() or not args.expected_text_file.is_file():
+                raise RuntimeError("transcript-file and expected-text-file must be existing regular files")
+            obs_norm = normalize_text(args.transcript_file.read_text(encoding="utf-8"))
+            exp_norm = normalize_text(args.expected_text_file.read_text(encoding="utf-8"))
+            if not exp_norm:
+                raise RuntimeError("expected-text-file has no normalizable characters")
+            coverage = round(multiset_recall(exp_norm, obs_norm), 4)
+            report["observed"]["transcript_char_coverage"] = coverage
+            passed_cov = bool(obs_norm) and coverage >= args.min_char_coverage
+            report["checks"]["transcript_coverage"] = passed_cov
+            if not passed_cov:
+                report["errors"].append(
+                    f"transcript coverage {coverage} below required {args.min_char_coverage}"
+                )
         report["checks"]["expected_properties"] = not report["errors"]
         report["passed"] = not report["errors"]
     except (RuntimeError, OSError, ValueError, KeyError, ZeroDivisionError) as exc:

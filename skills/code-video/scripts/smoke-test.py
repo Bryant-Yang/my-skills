@@ -49,29 +49,85 @@ def main():
             studio = scene / "studio.html"
             template = (here.parent / "assets" / "canvas-starter" / "studio.html").read_text()
             studio.write_text(template)
+            dependency_key = "--dependency-root" if args.dependency_root else "--puppeteer-module"
+            dependency_value = args.dependency_root or args.puppeteer_module
+
+            # 1) Audio-free keyframe inspection mode + layout overflow telemetry +canvas#film fallback
+            kf_dir = root / "keyframes"
+            film_studio = scene / "studio-film.html"
+            film_studio.write_text(
+                template.replace('id="out"', 'id="film"').replace('#out', '#film')
+                .replace("960, time", "120, time")
+            )
+            kf_cmd = ["node", str(here / "render-canvas.mjs"), "--studio", str(film_studio),
+                      "--keyframes", "0,0.4,1.6", "--out-dir", str(kf_dir), "--chrome", args.chrome,
+                      dependency_key, dependency_value]
+            kf_res = json.loads(invoke(kf_cmd).stdout)
+            if len(kf_res["keyframes"]) != 3 or not kf_res["layout_warnings"]:
+                raise RuntimeError("Keyframe mode failed to emit 3 PNGs or capture layout overflow telemetry")
+            invoke(kf_cmd, expected=1, evidence="Keyframe output already exists")
+            report["checks"].append({
+                "keyframes_and_layout_telemetry": {
+                    "count": len(kf_res["keyframes"]),
+                    "warnings_captured": len(kf_res["layout_warnings"]),
+                }
+            })
+
+            # 2) Full render, multi-worker parity, chapters, and transcript reconciliation
             audio = root / "tone.wav"
             with wave.open(str(audio), "wb") as wav:
                 wav.setparams((1, 2, 48000, 0, "NONE", "not compressed"))
                 wav.writeframes(b"".join(struct.pack("<h", int(5000 * math.sin(2 * math.pi * 440 * i / 48000)))
                                          for i in range(38400)))
+            chapters = root / "chapters.ffmeta"
+            chapters.write_text(
+                ";FFMETADATA1\n[CHAPTER]\nTIMEBASE=1/1000\nSTART=0\nEND=400\ntitle=Part 1\n"
+                "[CHAPTER]\nTIMEBASE=1/1000\nSTART=400\nEND=833\ntitle=Part 2\n",
+                encoding="utf-8",
+            )
             out = root / "result.mp4"
-            dependency_key = "--dependency-root" if args.dependency_root else "--puppeteer-module"
-            dependency_value = args.dependency_root or args.puppeteer_module
             command = ["node", str(here / "render-canvas.mjs"), "--studio", str(studio),
-                       "--audio", str(audio), "--out", str(out), "--fps", "12", "--chrome", args.chrome,
+                       "--audio", str(audio), "--out", str(out), "--fps", "12", "--workers", "2",
+                       "--chapters", str(chapters), "--chrome", args.chrome,
                        dependency_key, dependency_value]
             result = json.loads(invoke(command).stdout)
             report["checks"].append({"render_and_full_decode": result["verification"],
+                                     "workers": result["workers"],
                                      "sampled_seek": result["seek_checks"]})
+
+            expected_txt = root / "expected.txt"
+            good_asr = root / "good-asr.txt"
+            bad_asr = root / "bad-asr.txt"
+            expected_txt.write_text("单卡显存锁死主干，主机内存常驻记忆表，零读盘零漏字。\n", encoding="utf-8")
+            good_asr.write_text("单卡显存锁死主干 主机内存常驻记忆表 零读盘零漏字\n", encoding="utf-8")
+            bad_asr.write_text("只剩最后半句零漏字\n", encoding="utf-8")
+            verified_extra = json.loads(invoke([
+                "python3", str(here / "verify-video.py"), str(out),
+                "--expect-chapters", "2",
+                "--transcript-file", str(good_asr),
+                "--expected-text-file", str(expected_txt),
+            ]).stdout)
+            if not (verified_extra["checks"].get("chapters_valid") and verified_extra["checks"].get("transcript_coverage")):
+                raise RuntimeError("Chapter or transcript reconciliation check failed")
+            invoke([
+                "python3", str(here / "verify-video.py"), str(out),
+                "--transcript-file", str(bad_asr),
+                "--expected-text-file", str(expected_txt),
+            ], expected=1, evidence="transcript coverage")
+            invoke([
+                "python3", str(here / "verify-video.py"), str(out),
+                "--expect-chapters", "5",
+            ], expected=1, evidence="chapters: expected 5")
+            report["checks"].append("chapter metadata and ASR transcript recall gates verified")
+
             aligned_audio = root / "frame-aligned.wav"
             with wave.open(str(aligned_audio), "wb") as wav:
                 wav.setparams((1, 2, 48000, 0, "NONE", "not compressed"))
                 wav.writeframes(b"".join(struct.pack("<h", int(5000 * math.sin(2 * math.pi * 440 * i / 48000)))
                                          for i in range(8000)))
-            aligned_command = list(command)
-            aligned_command[aligned_command.index("--audio") + 1] = str(aligned_audio)
-            aligned_command[aligned_command.index("--out") + 1] = str(root / "frame-aligned.mp4")
-            aligned_command[aligned_command.index("--fps") + 1] = "24"
+            aligned_command = ["node", str(here / "render-canvas.mjs"), "--studio", str(studio),
+                               "--audio", str(aligned_audio), "--out", str(root / "frame-aligned.mp4"),
+                               "--fps", "24", "--chrome", args.chrome, dependency_key, dependency_value]
             aligned = json.loads(invoke(aligned_command).stdout)
             if aligned["verification"]["observed"]["frames"] != 4 or result["verification"]["observed"]["frames"] != 10:
                 raise RuntimeError("PCM frame ceiling does not preserve aligned/partial-frame sample counts")
@@ -149,7 +205,7 @@ def main():
                 raise RuntimeError("Failed silent-audio verification published movie")
             invoke(silent_command + ["--allow-silent-audio"])
             report["checks"].append("silent audio rejected by default; explicit permission works")
-            if list(root.glob(".code-video-*")):
+            if list(root.glob(".code-video-*")) or list(kf_dir.glob(".code-video-*")):
                 raise RuntimeError("Owned temporary render directory left behind")
             report["checks"].append("owned render temporary directories cleaned")
             report["passed"] = True

@@ -17,49 +17,59 @@ window.renderAt = (t, type = 'image/jpeg', quality = 0.94) => {
 };
 ```
 
-`canvas.width/height` 决定输出像素尺寸，CSS 决定预览布局。页面可以提供播放或 scrub，但离线渲染直接取 t，不按播放键。其他成熟 renderer 可能还有 `gpuInfo()` 或 `renderSheet()` 契约；使用哪个工具就核对哪个实际接口，不要求所有工程实现不存在的接口。
+`canvas.width/height` 决定输出像素尺寸，CSS 决定预览布局。默认识别 `canvas#out`、`canvas#film` 或页面唯一的 `<canvas>`，多画布页面通过 `--selector` 显式指定。页面可以维护可选的 `window.__layoutWarnings = []`，在 `renderAt(t)` 内记录文字实测宽度超出容器的告警，由导出器在关键帧和成片阶段汇总输出。
 
-## 确定性与就绪
+## 确定性、就绪与防穿模原语
 
-- 状态来自 t、固定输入和固定 seed。避免墙钟、未播种随机数、跨帧累积或依赖播放历史。画面动作、模拟和粒子都能从目标时间重建。
-- 字体加载、图像解码、离屏缓冲和当前帧绘制完成后才声明 ready。页面错误、缺失资源或字体替换须处理，不能因第二次截图恰好正确便通过。
-- 固定导出 fps，使用明确帧索引与时间映射；不按不稳定的浏览器 rAF 速度截图。确认最后一帧、音轨与容器时长的取整关系。
-- 离线导出使用已准备的本地资源。视频素材若需逐帧确定性，可先按输出 fps 解码成图像序列；不能让嵌入媒体自行播放并假装同步。
-- 顺序、乱序与冷启动抽同一时点，比较实际无损帧。完整像素比对用于发现保留状态，语义正确仍需查看关键动作。
+- 状态来自 `t`、固定输入和固定 seed。避免墙钟、未播种随机数、跨帧累积或依赖播放历史。画面动作、模拟和粒子都能从目标时间重建。
+- `t = 0`（默认播放器封面帧）应直接建立主结构或可读初始态，避免把核心面板全部设为零透明度入场而产生空白封面。
+- 动态生长的进度条、柱体或擦除面板内含文字时，使用 `ctx.save(); ctx.beginPath(); ctx.rect(x, y, currentW, h); ctx.clip()` 对文字做同步裁切揭示，并将紧邻其右侧的次级徽章安排在主条到位之后或固定安全坐标，防止 `p ≈ 0.35` 中途帧发生文字溢框与组件互撞。
+- 嵌入外部实测截图或示意图时，按源图真实宽高比做等比居中（`contain`）或明确安全裁切，禁止直接把不同比例的图片硬拉进目标矩形导致圆轮、图标或 UI 几何变形。
+- 字体加载、图像解码、离屏缓冲和当前帧绘制完成后才声明 `ready`。顺序、乱序与冷启动抽同一时点，比较实际无损帧。
 
-p5 工程的随机与噪声按实际代码设置种子；第三方库也可能引入随机，不能只检查自己的脚本。组件若需文字合成、离屏绘制或相机配对，保留其真实顺序和约束；不要把某个项目的 helper 名称变成通用 Canvas 接口。
+## 音轨与「一幕多句」双层时间轴
 
-## 音轨与时间轴
+复用用户音频，或选择已授权且可用的 TTS。多数分段式配音服务不仅按换行分段，还会按句末标点（`。！？；`）拆句；强行把整幕十几秒文案改成一逗到底，既会损失问句与句号的自然语调，也会让单条长字幕长时间占屏。
 
-复用用户音频，或选择已授权且可用的 TTS。读取实际音频时长与句/词 cue；分段 boundary 是块内相对时间，必须按实际拼接偏移换算。按 PCM 样本计数或整数 `duration_ts × time_base` 核对拼接长度与帧边界，避免显示用的小数舍入多算一帧；JSON 的申报时长不能替代实际解码。
+推荐采用 **视觉幕（Beat）1 : N 语音句（Sentence）** 双层结构：
 
-补入 lead/gap/tail 后用拼接音轨的总长作为最终时长，不能再加一遍尾垫。固定目标时长需要明确编辑、补静音或调整动作，不静默拉伸声音。没有词级 cue 时采用段级事件或明示编辑估计；不要根据字数宣称固定同步误差。
+1. 每幕包含若干自然短句，幕内句间设短气口（如 `250–300 ms`），幕尾设阅读与观察停留（如 `1200–1800 ms`）。
+2. 每句分别保存口语读音文本（将易读崩的符号或缩写转为自然读法，或配置发音词典）与精炼屏幕字幕（保留准确技术符号与单位），避免将 TTS 妥协写法直接印上屏幕。
+3. 读取导出音频的实际样本偏移（如 `start_frame` 与 `frames`）切出每句真实 PCM，在幕内拼入短气口静音、幕尾按帧边界（`sample_rate / fps` 样本整数倍）补齐尾垫，同时生成幕级动画时长与句级精确字幕（画布滚动字幕及独立 `.srt`）。
+4. 按 PCM 样本计数或整数 `duration_ts × time_base` 核对拼接总长与帧边界，避免小数舍入多算一帧；补入 lead/gap/tail 后用拼接音轨的实际总长作为最终时长，不能再加一遍尾垫。
 
 ## 使用本包工具
 
 依赖：Node.js、已安装的 `puppeteer-core`、Chrome/Chromium、FFmpeg/ffprobe；验证器使用 Python 标准库。先检查是否已有；本包脚本不下载浏览器、不安装软件、不调用 TTS。
 
-从 skill 文件所在目录解析 `<skill-dir>`，命令中的项目、资源和输出路径使用当前任务的实际值。完整选项以脚本 `--help` 为准。
+从 skill 文件所在目录解析 `<skill-dir>`，命令中的项目、资源和输出路径使用当前任务的实际值。完整选项以 `--help` 为准：
 
 ```bash
+# 1) 全量渲染前：免音频抽检首帧、过渡中途帧与各幕终态，并收集排版越界告警
 node <skill-dir>/scripts/render-canvas.mjs \
-  --studio <project>/studio.html --audio <project>/assets/narration.wav \
-  --out <project>/out/film.mp4 --duration <actual-seconds> --fps 24 \
-  --width 1080 --height 1920 --chrome <chrome-binary> \
+  --studio <project>/studio-draft.html \
+  --keyframes 0,3.2,8.5,16.0 \
+  --out-dir <project>/out/keyframes \
+  --chrome <chrome-binary> \
+  --dependency-root <project-with-puppeteer-core>
+
+# 2) 多页面并行导出成片（可附带 FFMETADATA1 章节文件）
+node <skill-dir>/scripts/render-canvas.mjs \
+  --studio <project>/studio.html --audio <project>/out/combined.wav \
+  --out <project>/out/film.mp4 --fps 24 --workers 4 \
+  --chapters <project>/out/chapters.ffmeta \
+  --chrome <chrome-binary> \
   --dependency-root <project-with-puppeteer-core> \
   --resource-root <local-resource-root>
 
+# 3) 独立校验流属性、章节与可选的编码音轨 ASR 转写覆盖率
 python3 <skill-dir>/scripts/verify-video.py <project>/out/film.mp4 \
-  --width 1080 --height 1920 --fps 24 --duration <actual-seconds> \
-  --report <project>/verification/technical.json
+  --width 1920 --height 1080 --fps 24 --expect-chapters 5 \
+  --transcript-file <project>/out/encoded-asr.txt \
+  --expected-text-file <project>/out/expected-voice.txt \
+  --report <project>/out/verify-video.json
 ```
 
-`--dependency-root` 是已安装 `node_modules/puppeteer-core` 的项目目录，也可用 `--puppeteer-module` 指向模块入口或包目录。`--resource-root` 默认 studio 所在目录；旧工程使用 `../node_modules` 等相对资源时，显式给包含这些资源的上级根，真实文件路径仍不能越界。页面只读取本次本地服务资源，不请求外部网络。
+`--dependency-root` 是已安装 `node_modules/puppeteer-core` 的项目目录，无需把依赖包复制进每个新视频目录。`--workers` 在验证单页正逆序与冷启动确定性一致后，自动启动多个隔离沙箱页面并行渲染长片帧序列。若工程自备渲染器支持帧文件增量缓存，修改单幕代码后可仅删除受影响帧区间（`beat.frame .. beat.frame + beat.frames`）局部重渲，但跨幕共享组件或时间轴改变时必须全量重渲。
 
-宽高参数是对实际画布属性的断言，不负责缩放或修正构图。省略 `--duration` 时取音轨实测长度；显式时长与音轨差不得超过一帧。帧数按输出帧边界取整，视频可能比音轨长不足一帧，验收按该 fps 的容差解释，不宣称所有容器时长完全相等。
-
-现有输出默认保留，明确覆盖才使用渲染器 `--overwrite`。配音/音乐任务默认拒绝意外静音；有意静音时显式使用 `--allow-silent-audio`，它仍要求实际音轨。音频检查使用 decoded RMS 与 sample peak，不是感知响度、true peak 或真人试听。
-
-本包每次使用独有的临时帧目录；若使用其他 renderer 的断点续渲，只有源码、输入与时间轴未变才能复用旧帧。按源哈希失效须覆盖所有实际输入；不确定影响范围时重新全量渲染。
-
-最小 [Canvas 样板](../assets/canvas-starter/studio.html) 只展示 ready、纯函数与按时刻绘制，正式影片须替换为本题的视觉内容。技术 smoke 不是叙事成片。
+最小 [Canvas 样板](../assets/canvas-starter/studio.html) 仅展示 `ready`、纯函数 `renderAt(t)`、生长条块 `clipRect` 裁切及 `window.__layoutWarnings` 越界遥测，正式影片须替换为本题的视觉内容。
