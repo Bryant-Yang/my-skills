@@ -27,6 +27,13 @@ window.renderAt = (t, type = 'image/jpeg', quality = 0.94) => {
 - 嵌入外部实测截图或示意图时，按源图真实宽高比做等比居中（`contain`）或明确安全裁切，禁止直接把不同比例的图片硬拉进目标矩形导致圆轮、图标或 UI 几何变形。
 - 字体加载、图像解码、离屏缓冲和当前帧绘制完成后才声明 `ready`。顺序、乱序与冷启动抽同一时点，比较实际无损帧。
 
+## Web UI 交互录屏与 HiDPI 防闪屏要点
+
+- **HiDPI 满屏录屏配方（macOS Chrome Headless）**：需要放大 UI 字体（如 `1440×810` 视口录成 `1920×1080` 视频）时，必须通过启动参数 `--force-device-scale-factor=1.3333334 --window-size=1440,810 --app=about:blank` 控制缩放与去顶栏，且在 Playwright `newContext()` 中**不要传** `deviceScaleFactor`（传参会被覆盖回 CSS 像素尺寸并露出右侧/底部 `#808080` 灰边）。
+- **单段探针（Canary Clip）与全帧去闪门禁**：Chrome `--force-device-scale-factor` 录屏仍可能在个别帧瞬间缩回 `1440×810` 并露出灰边或白边（仅检查首帧或 `page.screenshot()` 无法发现）。改动视口/DPR 后先录 1 段探针校验无灰边，抽帧后须扫描**每一帧**并裁切还原或拦截异常缩框帧，成片编码后再跑 `verify-video.py --check-flicker`。
+- **Shadow DOM 脱敏与审计**：对含 Web Components 的产品页面做无侵入脱敏替换与违禁词审计时，必须递归穿透 `el.shadowRoot`，不能仅靠 `TreeWalker(document.body)` 或 `document.body.innerText`。
+- **单一事实源（SSOT）**：视觉配置（素材裁剪、局部缩放坐标、标题）应在渲染时直接从主分镜配置实时读取，音轨时间轴文件只保存语音实测起止时间，避免双份拷贝漂移。
+
 ## 音轨与「一幕多句」双层时间轴
 
 复用用户音频，或选择已授权且可用的 TTS。多数分段式配音服务不仅按换行分段，还会按句末标点（`。！？；`）拆句；强行把整幕十几秒文案改成一逗到底，既会损失问句与句号的自然语调，也会让单条长字幕长时间占屏。

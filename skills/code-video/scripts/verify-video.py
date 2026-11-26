@@ -2,6 +2,7 @@
 """Verify observable media properties; no aesthetic or human listening claim."""
 
 import argparse
+from array import array
 import json
 import math
 import os
@@ -79,6 +80,149 @@ def write_report(video, destination, report):
             temporary.unlink(missing_ok=True)
 
 
+def frame_l1_diff(a: bytes, b: bytes) -> float:
+    return sum(abs(x - y) for x, y in zip(a, b)) / max(1, len(a))
+
+
+def inspect_video_flicker(video_path: Path, fps: float) -> dict:
+    """Pure-stdlib scan for 1-frame flashes, short collapse bursts, and #808080 gray-border frames."""
+    w, h = 64, 36
+    stride = w * h * 3
+    proc = subprocess.run(
+        ["ffmpeg", "-nostdin", "-v", "error", "-i", str(video_path),
+         "-vf", f"scale={w}:{h}:flags=area", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+        capture_output=True,
+    )
+    if proc.returncode:
+        raise RuntimeError(f"ffmpeg flicker scan failed: {proc.stderr.decode('utf-8', 'replace')[-2000:]}")
+    raw = proc.stdout
+    n = len(raw) // stride
+    if n < 3:
+        return {"frames_scanned": n, "gray_border_frames": [], "single_frame_flashes": [], "burst_flashes": []}
+
+    # Extract interior stage bytes (x: 4..60, y: 2..34) and check bottom-right gray border strips
+    stages = []
+    lumas = []
+    gray_border_frames = []
+    for i in range(n):
+        base = i * stride
+        frame = raw[base:base + stride]
+        # Stage interior
+        stage_chunks = [frame[(y * w + 4) * 3:(y * w + 60) * 3] for y in range(2, 34)]
+        st = b"".join(stage_chunks)
+        stages.append(st)
+        lumas.append(sum(st) / len(st))
+
+        # Check right & bottom strips for Playwright HiDPI #808080 padding while top-left has content
+        edge_pts = []
+        for y in range(4, 30, 2):
+            for x in (58, 60, 62):
+                o = (y * w + x) * 3
+                edge_pts.append((frame[o], frame[o + 1], frame[o + 2]))
+        for x in range(4, 56, 4):
+            for y in (32, 34):
+                o = (y * w + x) * 3
+                edge_pts.append((frame[o], frame[o + 1], frame[o + 2]))
+        gray_hits = sum(
+            1 for r, g, b in edge_pts
+            if abs(r - 128) <= 12 and abs(g - 128) <= 12 and abs(b - 128) <= 12
+            and max(r, g, b) - min(r, g, b) <= 10
+        )
+        if gray_hits / len(edge_pts) >= 0.85:
+            # Verify top-left is not the exact same uniform gray
+            tl_chunks = [frame[(y * w + 4) * 3:(y * w + 36) * 3] for y in range(4, 22)]
+            tl = b"".join(tl_chunks)
+            tl_diff = sum(abs(v - 128) for v in tl) / len(tl)
+            if tl_diff > 18.0:
+                gray_border_frames.append({"frame": i, "sec": round(i / fps, 3)})
+
+    diffs = [frame_l1_diff(stages[i], stages[i + 1]) for i in range(n - 1)]
+    single_flashes = []
+    for i in range(1, n - 1):
+        dp, dn = diffs[i - 1], diffs[i]
+        if dp > 12.0 and dn > 12.0:
+            ds = frame_l1_diff(stages[i - 1], stages[i + 1])
+            luma_dev = abs(lumas[i] - 0.5 * (lumas[i - 1] + lumas[i + 1]))
+            if ds < min(dp, dn) * 0.50 and luma_dev > 6.0:
+                single_flashes.append({
+                    "frame": i, "sec": round(i / fps, 3),
+                    "diff_prev": round(dp, 1), "diff_skip": round(ds, 1),
+                    "luma": [round(lumas[i - 1], 1), round(lumas[i], 1), round(lumas[i + 1], 1)],
+                })
+
+    burst_flashes = []
+    i = 1
+    while i < n - 2:
+        if diffs[i - 1] > 18.0:
+            for k in range(2, min(16, n - i)):
+                if diffs[i + k - 1] > 18.0 and frame_l1_diff(stages[i - 1], stages[i + k]) < 6.0:
+                    burst_flashes.append({
+                        "start_frame": i, "sec": round(i / fps, 3),
+                        "length_frames": k, "entry_diff": round(diffs[i - 1], 1),
+                    })
+                    i += k
+                    break
+        i += 1
+
+    return {
+        "frames_scanned": n,
+        "gray_border_frames": gray_border_frames[:20],
+        "gray_border_count": len(gray_border_frames),
+        "single_frame_flashes": single_flashes[:20],
+        "single_frame_flash_count": len(single_flashes),
+        "burst_flashes": burst_flashes[:20],
+        "burst_flash_count": len(burst_flashes),
+    }
+
+
+def inspect_sentence_tails(media_path: Path, timeline_path: Path, max_tail_dbfs: float) -> dict:
+    """Measure RMS dBFS in the final 50ms of each sentence from a timeline JSON."""
+    tl = json.loads(timeline_path.read_text(encoding="utf-8"))
+    sentences = []
+    if isinstance(tl.get("beats"), list):
+        for b in tl["beats"]:
+            for s in b.get("sentences", []):
+                if "start" in s and "end" in s:
+                    sentences.append(s)
+    elif isinstance(tl.get("sentences"), list):
+        sentences = [s for s in tl["sentences"] if "start" in s and "end" in s]
+    if not sentences:
+        raise RuntimeError("sentence-timeline contains no sentences with start/end timestamps")
+
+    sr = 24000
+    proc = subprocess.run(
+        ["ffmpeg", "-nostdin", "-v", "error", "-i", str(media_path),
+         "-map", "0:a:0", "-vn", "-ac", "1", "-ar", str(sr), "-f", "s16le", "-"],
+        capture_output=True,
+    )
+    if proc.returncode:
+        raise RuntimeError(f"ffmpeg sentence-tail decode failed: {proc.stderr.decode('utf-8', 'replace')[-2000:]}")
+    samples = array("h")
+    samples.frombytes(proc.stdout)
+    win = int(sr * 0.050)
+    worst_db = -120.0
+    clipped = []
+    for idx, s in enumerate(sentences):
+        end_idx = min(len(samples), int(round(float(s["end"]) * sr)))
+        start_idx = max(0, end_idx - win)
+        seg = samples[start_idx:end_idx]
+        if not seg:
+            continue
+        rms = math.sqrt(sum((v / 32768.0) ** 2 for v in seg) / len(seg) + 1e-12)
+        db = round(20.0 * math.log10(rms), 2)
+        if db > worst_db:
+            worst_db = db
+        if db > max_tail_dbfs:
+            clipped.append({"index": idx + 1, "end_sec": round(float(s["end"]), 3), "tail50ms_dbfs": db})
+    return {
+        "sentences_checked": len(sentences),
+        "max_tail_dbfs_limit": max_tail_dbfs,
+        "worst_tail50ms_dbfs": round(worst_db, 2),
+        "clipped_sentences": clipped[:20],
+        "clipped_count": len(clipped),
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("video", type=Path)
@@ -104,6 +248,12 @@ def main():
                         help="maximum RMS threshold for declaring silence")
     parser.add_argument("--peak-limit-db", type=float, default=-0.1,
                         help="reject decoded sample peaks at or above this dBFS value")
+    parser.add_argument("--check-flicker", action="store_true",
+                        help="scan decoded video frames for 1-frame flashes, short collapse bursts, and gray-border frames")
+    parser.add_argument("--sentence-timeline", type=Path,
+                        help="optional timeline JSON (beats[].sentences[].{start,end}) to check final 50ms tail decay")
+    parser.add_argument("--max-tail-dbfs", type=float, default=-38.0,
+                        help="maximum allowed final-50ms RMS dBFS per sentence (default -38.0 for dry voice; raise for BGM mix)")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     limits = [
@@ -264,6 +414,31 @@ def main():
             if not passed_cov:
                 report["errors"].append(
                     f"transcript coverage {coverage} below required {args.min_char_coverage}"
+                )
+        if args.check_flicker:
+            flicker = inspect_video_flicker(args.video.resolve(), fps)
+            report["observed"]["flicker"] = flicker
+            total_glitches = (
+                flicker["gray_border_count"]
+                + flicker["single_frame_flash_count"]
+                + flicker["burst_flash_count"]
+            )
+            report["checks"]["no_flicker"] = total_glitches == 0
+            if total_glitches > 0:
+                report["errors"].append(
+                    f"flicker/border glitches detected: gray={flicker['gray_border_count']}, "
+                    f"1f={flicker['single_frame_flash_count']}, burst={flicker['burst_flash_count']}"
+                )
+        if args.sentence_timeline:
+            if not args.sentence_timeline.is_file():
+                raise RuntimeError("sentence-timeline must be an existing regular file")
+            tails = inspect_sentence_tails(args.video.resolve(), args.sentence_timeline.resolve(), args.max_tail_dbfs)
+            report["observed"]["sentence_tails"] = tails
+            report["checks"]["clean_sentence_tails"] = tails["clipped_count"] == 0
+            if tails["clipped_count"] > 0:
+                report["errors"].append(
+                    f"sentence tail clipping: {tails['clipped_count']} sentences exceed {args.max_tail_dbfs} dBFS "
+                    f"(worst {tails['worst_tail50ms_dbfs']} dBFS)"
                 )
         report["checks"]["expected_properties"] = not report["errors"]
         report["passed"] = not report["errors"]
